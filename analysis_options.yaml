@@ -1,0 +1,33 @@
+include:
+  - package:flutter_lints/flutter.yaml
+  - package:bloc_lint/recommended.yaml
+
+analyzer:
+  errors:
+    flutter_style_todos: ignore
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  exclude: 
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+    - '**/schema_v*'
+    - 'build'
+
+formatter:
+  page_width: 120
+  trailing_commas: preserve
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    avoid_field_initializers_in_const_classes: true
+    prefer_final_fields: true
+    prefer_final_in_for_each: true
+    prefer_final_locals: true
+    cascade_invocations: true
+    omit_obvious_property_types: true
+    omit_obvious_local_variable_types: true
