@@ -7,7 +7,7 @@ import 'package:intern_kassation_app/data/services/api/auth_api_client.dart';
 import 'package:intern_kassation_app/data/services/api/models/auth/login_request.dart';
 import 'package:intern_kassation_app/data/services/api/models/auth/logout_request.dart';
 import 'package:intern_kassation_app/data/services/api/models/auth/refresh_request.dart';
-import 'package:intern_kassation_app/data/services/secure_storage_service.dart';
+import 'package:intern_kassation_app/data/services/storage/secure_storage_service.dart';
 import 'package:intern_kassation_app/data/services/uuid_service.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/auth_error_codes.dart';
@@ -81,6 +81,7 @@ class AuthRepository {
   } */
 
   Future<AuthRepoResponse?> _trySilentAuthentication() async {
+    _logger.info('Attempting silent authentication');
     final token = await _loadToken();
     if (token == null) {
       return null;
@@ -95,6 +96,7 @@ class AuthRepository {
     }
 
     if (token.hasValidRefreshToken) {
+      _logger.info('_trySilentAuthentication: Access token expired, attempting to refresh using refresh token');
       final result = await refresh();
       return result.fold(
         (failure) => AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: true),
@@ -112,6 +114,7 @@ class AuthRepository {
     required String password,
     bool refreshIfAvailable = false,
   }) async {
+    _logger.info('Attempting to log in user: $username');
     if (refreshIfAvailable) {
       final silentAuthResult = await _trySilentAuthentication();
       if (silentAuthResult != null) {
@@ -156,9 +159,7 @@ class AuthRepository {
         final saveResult = await saveToken(token);
         return saveResult.fold(
           (failure) {
-            _emit(
-              AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: false),
-            );
+            _emit(AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: false));
             return left(failure);
           },
           (_) {
@@ -175,8 +176,10 @@ class AuthRepository {
   }
 
   Future<Either<AppFailure, AuthRepoResponse>> refresh({bool forceRefresh = false}) async {
+    _logger.info('Attempting to refresh access token');
     final currentToken = _cachedToken ?? await _loadToken();
     if (currentToken != null && currentToken.hasValidAccessToken && !forceRefresh) {
+      _logger.info('Current access token is still valid, no need to refresh');
       final repoResponse = AuthRepoResponse(
         status: AuthResponseStatus.authenticated,
         hasRefreshToken: currentToken.hasValidRefreshToken,
@@ -186,6 +189,7 @@ class AuthRepository {
     }
 
     if (currentToken == null || !currentToken.hasValidRefreshToken) {
+      _logger.warning('No valid refresh token available for refreshing access token');
       final failure = AppFailure(
         code: AuthErrorCode.invalidRefreshToken,
         context: {
@@ -207,10 +211,12 @@ class AuthRepository {
 
     return await result.fold(
       (failure) {
+        _logger.severe('Failed to refresh access token: $failure');
         _emit(AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: true));
         return left(failure);
       },
       (token) async {
+        _logger.info('Successfully refreshed access token');
         if (!token.hasValidAccessToken || !token.hasValidRefreshToken) {
           final failure = AppFailure(
             code: AuthErrorCode.invalidToken,
@@ -231,12 +237,14 @@ class AuthRepository {
 
         return saveResult.fold(
           (failure) {
+            _logger.severe('Failed to save refreshed token: $failure');
             _emit(
               AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: true),
             );
             return left(failure);
           },
           (_) {
+            _logger.info('Successfully saved refreshed token');
             final repoResponse = AuthRepoResponse(
               status: AuthResponseStatus.authenticated,
               hasRefreshToken: token.hasValidRefreshToken,
@@ -339,6 +347,9 @@ class AuthRepository {
   }
 
   Future<Either<AppFailure, void>> saveToken(Token token) async {
+    _logger.info(
+      'Saving token with refresh token: ${token.refreshToken}',
+    );
     final result = await _secureStorageService.write(
       SecureStorageKeys.token.name,
       token.toJson(),
@@ -347,6 +358,7 @@ class AuthRepository {
   }
 
   Future<Token?> _loadToken() async {
+    _logger.info('Loading token from secure storage');
     final result = await _secureStorageService.read(SecureStorageKeys.token.name);
     if (result.isLeft()) return null;
 
@@ -354,9 +366,15 @@ class AuthRepository {
     if (raw == null) return null;
 
     try {
+      _logger.info('Token found in secure storage, parsing token');
       final token = Token.fromJson(raw);
+      _logger.info(
+        'Loaded token with refresh token: ${token.refreshToken} - Refresh token expiry: ${token.refreshTokenExpiresUtc}',
+      );
+      _cachedToken = token;
       return token;
     } catch (e) {
+      _logger.severe('Failed to parse token from secure storage: $e');
       _secureStorageService.delete(SecureStorageKeys.token.name);
       return null;
     }

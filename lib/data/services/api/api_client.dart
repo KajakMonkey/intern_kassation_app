@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:intern_kassation_app/config/api_endpoints.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
@@ -45,8 +46,8 @@ class ApiClient {
     dio.interceptors.add(
       LogInterceptor(
         requestHeader: true,
-        requestBody: true,
-        responseBody: true,
+        requestBody: kDebugMode,
+        responseBody: kDebugMode,
         request: true,
         logPrint: (obj) => _logger.fine(_redactAuth(obj)),
       ),
@@ -65,7 +66,7 @@ class ApiClient {
 
   final Dio _client;
 
-  static final _logger = Logger('ApiClientTest');
+  static final _logger = Logger('ApiClient');
 
   AuthHeaderProvider? _authHeaderProvider;
 

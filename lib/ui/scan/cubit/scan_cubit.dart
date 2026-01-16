@@ -49,6 +49,10 @@ class ScanCubit extends Cubit<ScanState> {
     await _orderRepository.fetchLatestDiscardedOrders();
   }
 
+  void clearOrderStatus() {
+    safeEmit(state.copyWith(orderStatus: const OrderState.initial()));
+  }
+
   @override
   Future<void> close() async {
     await _discardedSub?.cancel();

@@ -1,23 +1,26 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:intern_kassation_app/data/services/shared_preferences_service.dart';
+import 'package:intern_kassation_app/data/services/storage/interface/key_value_storage.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/storage_error_codes.dart';
+import 'package:logging/logging.dart';
 
 class CachingService {
-  CachingService({required SharedPreferencesService sharedPreferencesService})
-    : _sharedPreferencesService = sharedPreferencesService;
-  final SharedPreferencesService _sharedPreferencesService;
+  CachingService({required KeyValueStorage keyValueStorage}) : _keyValueStorage = keyValueStorage;
+  final KeyValueStorage _keyValueStorage;
 
   static const _defaultTtl = Duration(minutes: 15);
+
+  static final _logger = Logger('CachingService');
 
   Future<Either<AppFailure, void>> write(String key, String value, {Duration ttl = _defaultTtl}) async {
     final cacheKey = _getCacheKey(key);
     try {
-      await _sharedPreferencesService.setString(key, value);
+      await _keyValueStorage.write(key, value);
       final expiryTime = DateTime.now().toUtc().add(ttl).millisecondsSinceEpoch;
-      await _sharedPreferencesService.setInt(cacheKey, expiryTime);
+      await _keyValueStorage.setInt(cacheKey, expiryTime);
       return right(null);
-    } catch (e) {
+    } catch (e, st) {
+      _logger.severe('Error writing to cache', e, st);
       return left(
         AppFailure(
           code: StorageErrorCodes.sharedPrefsWriteError,
@@ -30,7 +33,7 @@ class CachingService {
   Future<Either<AppFailure, String?>> read(String key, {bool returnIfExpired = false}) async {
     final cacheKey = _getCacheKey(key);
     try {
-      final result = await _sharedPreferencesService.getString(key);
+      final result = await _keyValueStorage.read(key);
       if (result.isLeft()) {
         return left(result.getLeft().toNullable()!);
       }
@@ -44,7 +47,7 @@ class CachingService {
         return right(null);
       }
 
-      final expiryResult = await _sharedPreferencesService.getInt(cacheKey);
+      final expiryResult = await _keyValueStorage.getInt(cacheKey);
       if (expiryResult.isLeft()) {
         return left(expiryResult.getLeft().toNullable()!);
       }
@@ -62,7 +65,8 @@ class CachingService {
       }
 
       return right(cachedValue);
-    } catch (e) {
+    } catch (e, st) {
+      _logger.severe('Error reading from cache', e, st);
       return left(
         AppFailure(
           code: StorageErrorCodes.sharedPrefsReadError,
@@ -75,10 +79,11 @@ class CachingService {
   Future<Either<AppFailure, void>> delete(String key) async {
     final cacheKey = _getCacheKey(key);
     try {
-      await _sharedPreferencesService.remove(key);
-      await _sharedPreferencesService.remove(cacheKey);
+      await _keyValueStorage.delete(key);
+      await _keyValueStorage.delete(cacheKey);
       return right(null);
-    } catch (e) {
+    } catch (e, st) {
+      _logger.severe('Error deleting from cache', e, st);
       return left(
         AppFailure(
           code: StorageErrorCodes.sharedPrefsDeleteError,

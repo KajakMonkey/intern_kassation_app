@@ -5,7 +5,8 @@ import 'package:intern_kassation_app/ui/core/extensions/navigation_extension.dar
 import 'package:package_info_plus/package_info_plus.dart';
 
 class ScanDrawer extends StatelessWidget {
-  const ScanDrawer({super.key});
+  const ScanDrawer({super.key, this.onResetScanner});
+  final void Function()? onResetScanner;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +30,7 @@ class ScanDrawer extends StatelessWidget {
                 ..pushNamed(Routes.account.name);
             },
           ),
+          const Divider(height: 0, indent: Gap.m, endIndent: Gap.m),
           ListTile(
             leading: const Icon(Icons.search),
             title: const Text('Tidligere Kassationer'),
@@ -39,6 +41,27 @@ class ScanDrawer extends StatelessWidget {
                 ..pushNamed(Routes.lookup.name);
             },
           ),
+          const Divider(height: 0, indent: Gap.m, endIndent: Gap.m),
+          ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Indtast produktionsordre manuelt'),
+            onTap: () {
+              context
+                ..unfocus()
+                ..maybePop()
+                ..pushNamed(Routes.manualScan.name);
+            },
+          ),
+          const Divider(height: 0, indent: Gap.m, endIndent: Gap.m),
+          ListTile(
+            leading: const Icon(Icons.build),
+            title: const Text('Nulstil scanner'),
+            onTap: () {
+              onResetScanner?.call();
+              context.maybePop();
+            },
+          ),
+          const Divider(height: 0, indent: Gap.m, endIndent: Gap.m),
           ListTile(
             leading: const Icon(Icons.info),
             title: Text(context.l10n.about_app),

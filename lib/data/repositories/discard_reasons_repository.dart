@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:intern_kassation_app/config/constants/product_type.dart';
 import 'package:intern_kassation_app/data/services/api/api_client.dart';
-import 'package:intern_kassation_app/data/services/caching_service.dart';
+import 'package:intern_kassation_app/data/services/storage/caching_service.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/models/discard/discard_reason.dart';
 import 'package:intern_kassation_app/domain/models/discard/discard_reason_response.dart';
@@ -30,7 +30,6 @@ class DiscardReasonsRepository {
     if (!forceRefresh) {
       final cachedReasons = await _loadDiscardFromCache(cacheKey);
       if (cachedReasons != null) {
-        _logger.info('Loaded ${cachedReasons.length} discard reasons from cache for product type: ${productType.code}');
         return right(DiscardReasonResponse(reasons: cachedReasons));
       }
     }

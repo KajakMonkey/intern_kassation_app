@@ -16,6 +16,7 @@ import 'package:intern_kassation_app/ui/lookup/cubits/lookup_details_cubit/looku
 import 'package:intern_kassation_app/ui/lookup/widgets/lookup_details_screen.dart';
 import 'package:intern_kassation_app/ui/lookup/widgets/lookup_screen.dart';
 import 'package:intern_kassation_app/ui/scan/widgets/camra_scan_screen.dart';
+import 'package:intern_kassation_app/ui/scan/widgets/manual_scan_screen.dart';
 import 'package:intern_kassation_app/ui/scan/widgets/scan_screen.dart';
 import 'package:intern_kassation_app/ui/splash/widgets/splash_screen.dart';
 import 'package:intern_kassation_app/utils/stream_listenable.dart';
@@ -54,6 +55,11 @@ final _appRoutes = <GoRoute>[
         name: Routes.cameraScan.name,
         path: Routes.cameraScan.path,
         builder: (context, state) => const CameraScanScreen(),
+      ),
+      GoRoute(
+        name: Routes.manualScan.name,
+        path: Routes.manualScan.path,
+        builder: (context, state) => const ManualScanScreen(),
       ),
     ],
   ),

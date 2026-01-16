@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:intern_kassation_app/common_index.dart';
-import 'package:intern_kassation_app/config/env.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/error_codes_index.dart';
 import 'package:intern_kassation_app/routing/navigator.dart';
 import 'package:intern_kassation_app/routing/router.dart';
@@ -22,8 +21,8 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> with RouteAware {
   late final TextEditingController _ordrenrController;
+  late final FocusNode _keyboardFocusNode;
   String? _errorText;
-  bool _useHardwareScanner = EnvManager.useHardwareScanner;
 
   final _scanBuffer = StringBuffer();
   Timer? _scanDebounce;
@@ -36,6 +35,11 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
   void initState() {
     super.initState();
     _ordrenrController = TextEditingController();
+    _keyboardFocusNode = FocusNode();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _keyboardFocusNode.requestFocus();
+    });
   }
 
   @override
@@ -47,63 +51,53 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
   @override
   void dispose() {
     scanRouteObserver.unsubscribe(this);
-
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.removeHandler(_onHardwareKey);
-    }
     _scanDebounce?.cancel();
     _ordrenrController.dispose();
-
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
   @override
-  void didPush() {
-    // Route was pushed onto navigator and is now current.
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.addHandler(_onHardwareKey);
-    }
-  }
-
-  @override
   void didPopNext() {
-    // Covering route was popped off the navigator.
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.addHandler(_onHardwareKey);
-    }
+    // Called when returning to this screen (covering route was popped)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _keyboardFocusNode.requestFocus();
+      }
+    });
   }
 
   @override
-  void didPop() {
-    // Route was popped off the navigator.
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.removeHandler(_onHardwareKey);
-    }
+  void didPush() {
+    // Called when this route is pushed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _keyboardFocusNode.requestFocus();
+      }
+    });
   }
 
   @override
   void didPushNext() {
-    // Another route was pushed onto the navigator.
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.removeHandler(_onHardwareKey);
-    }
+    // Called when a new route is pushed on top of this one
+    _keyboardFocusNode.unfocus();
   }
 
-  bool _onHardwareKey(KeyEvent event) {
+  void _onKeyEvent(KeyEvent event) {
     if (event is! KeyDownEvent) {
-      return false;
+      return;
     }
 
     final key = event.logicalKey;
 
     if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.tab) {
       _commitScan();
-      return true;
+      return;
     }
 
     final character = event.character;
     if (character == null || character.isEmpty) {
-      return false;
+      return;
     }
 
     final now = DateTime.now();
@@ -116,8 +110,6 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
 
     _scanDebounce?.cancel();
     _scanDebounce = Timer(_scanTimeout, _commitScan);
-
-    return true;
   }
 
   void _commitScan() {
@@ -211,113 +203,101 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
       },
       buildWhen: (previous, current) => previous.orderStatus != current.orderStatus,
       builder: (context, state) {
-        return AppScaffold.withLoadingIndicator(
-          appBar: AppBar(
-            title: Text(l10n.app_name),
-            actions: [
-              if (!Platform.isWindows)
-                IconButton(
-                  icon: const Icon(Icons.qr_code_2),
-                  onPressed: state.orderStatus != const OrderState.loading()
-                      ? () async {
-                          final result = await context.pushNamed(Routes.cameraScan.name);
+        return KeyboardListener(
+          focusNode: _keyboardFocusNode,
+          autofocus: true,
+          onKeyEvent: _onKeyEvent,
+          child: AppScaffold.withLoadingIndicator(
+            appBar: AppBar(
+              title: Text(l10n.app_name),
+              actions: [
+                if (!Platform.isWindows)
+                  IconButton(
+                    icon: const Icon(Icons.qr_code_2),
+                    onPressed: state.orderStatus != const OrderState.loading()
+                        ? () async {
+                            final result = await context.pushNamed(Routes.cameraScan.name);
 
-                          if (result is String && result.isNotEmpty) {
-                            _ordrenrController.text = result;
-                            setState(() {});
-                            unawaited(_submitForm());
+                            if (result is String && result.isNotEmpty) {
+                              _ordrenrController.text = result;
+                              setState(() {});
+                              unawaited(_submitForm());
+                            }
                           }
-                        }
-                      : null,
-                ),
-            ],
-          ),
-          drawer: state.orderStatus != const OrderState.loading() ? const ScanDrawer() : null,
-          scrollable: true,
-          isLoading: state.orderStatus == const OrderState.loading(),
-          body: Column(
-            children: [
-              Text(
-                context.l10n.scan_or_manual_entry,
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
-              ),
-              Gap.vs,
-              SegmentedButton<bool>(
-                segments: [
-                  ButtonSegment(
-                    value: true,
-                    label: Text(context.l10n.scan_use_hardware_scanner),
-                    icon: const Icon(Icons.scanner),
+                        : null,
                   ),
-                  ButtonSegment(
-                    value: false,
-                    label: Text(context.l10n.scan_manual_entry),
-                    icon: const Icon(Icons.keyboard),
+              ],
+            ),
+            drawer: state.orderStatus != const OrderState.loading()
+                ? ScanDrawer(
+                    onResetScanner: () {
+                      context.read<ScanCubit>().clearOrderStatus();
+
+                      _keyboardFocusNode.requestFocus();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(context.l10n.scanner_reset),
+                        ),
+                      );
+                    },
+                  )
+                : null,
+            scrollable: true,
+            isLoading: state.orderStatus == const OrderState.loading(),
+            body: GestureDetector(
+              onTap: () => _keyboardFocusNode.requestFocus(),
+              behavior: HitTestBehavior.translucent,
+              child: Column(
+                children: [
+                  Text(
+                    context.l10n.scan_entry,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
                   ),
+                  Gap.vm,
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: context.l10n.production_order,
+                      border: const OutlineInputBorder(),
+                      errorText: _errorText,
+                      suffixIcon: state.orderStatus != const OrderState.loading() && _ordrenrController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _ordrenrController.clear();
+                                setState(() {
+                                  _errorText = null;
+                                });
+                                _keyboardFocusNode.requestFocus();
+                              },
+                            )
+                          : null,
+                    ),
+                    readOnly: true,
+                    enabled: state.orderStatus != const OrderState.loading(),
+                    controller: _ordrenrController,
+                    onChanged: (value) {
+                      setState(() {
+                        _errorText = null;
+                      });
+                    },
+                  ),
+                  Gap.vl,
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _ordrenrController.text.isNotEmpty && state.orderStatus != const OrderState.loading()
+                          ? _submitForm
+                          : null,
+                      label: Text(context.l10n.next),
+                      icon: const Icon(Icons.arrow_forward),
+                      iconAlignment: IconAlignment.end,
+                    ),
+                  ),
+                  Gap.vl,
+                  const LatestDiscardedList(),
                 ],
-                selected: {_useHardwareScanner},
-                onSelectionChanged: state.orderStatus != const OrderState.loading()
-                    ? (newSelection) {
-                        final useScanner = newSelection.first;
-                        if (useScanner) {
-                          HardwareKeyboard.instance.addHandler(_onHardwareKey);
-                        } else {
-                          HardwareKeyboard.instance.removeHandler(_onHardwareKey);
-                        }
-                        setState(() {
-                          _useHardwareScanner = useScanner;
-                        });
-                      }
-                    : null,
               ),
-              Gap.vm,
-              TextField(
-                decoration: InputDecoration(
-                  labelText: context.l10n.production_order,
-                  border: const OutlineInputBorder(),
-                  errorText: _errorText,
-                  suffixIcon: state.orderStatus != const OrderState.loading() && _ordrenrController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _ordrenrController.clear();
-                            setState(() {
-                              _errorText = null;
-                            });
-                          },
-                        )
-                      : null,
-                ),
-                readOnly: state.orderStatus == const OrderState.loading() || _useHardwareScanner,
-                enabled: state.orderStatus != const OrderState.loading(),
-                controller: _ordrenrController,
-                textInputAction: .done,
-                onChanged: (value) {
-                  setState(() {
-                    _errorText = null;
-                  });
-                },
-                onSubmitted: (value) {
-                  if (value.isNotEmpty && state.orderStatus != const OrderState.loading()) {
-                    unawaited(_submitForm());
-                  }
-                },
-              ),
-              Gap.vl,
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: _ordrenrController.text.isNotEmpty && state.orderStatus != const OrderState.loading()
-                      ? _submitForm
-                      : null,
-                  label: Text(context.l10n.next),
-                  icon: const Icon(Icons.arrow_forward),
-                  iconAlignment: .end,
-                ),
-              ),
-              Gap.vl,
-              const LatestDiscardedList(),
-            ],
+            ),
           ),
         );
       },

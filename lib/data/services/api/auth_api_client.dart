@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
 import 'package:intern_kassation_app/config/env.dart';
@@ -36,8 +37,8 @@ class AuthApiClient {
     dio.interceptors.add(
       LogInterceptor(
         requestHeader: true,
-        requestBody: true,
-        responseBody: true,
+        requestBody: kDebugMode,
+        responseBody: kDebugMode,
         request: true,
         logPrint: (obj) => _logger.fine(_redactAuth(obj)),
       ),
@@ -47,18 +48,19 @@ class AuthApiClient {
 
   static String _redactAuth(Object? obj) {
     final s = obj?.toString() ?? '';
-    //replace password and refresh token in the log with [REDACTED]
-    return s;
-    // TODO: redact sensitive info when testing is complete
-    /* return s
+    return s
         .replaceAll(
           RegExp(r'("password"\s*:\s*")([^"]+)(")', caseSensitive: false),
           r'\1[REDACTED]\3',
         )
         .replaceAll(
+          RegExp(r'("accessToken"\s*:\s*")([^"]+)(")', caseSensitive: false),
+          r'\1[REDACTED]\3',
+        )
+        .replaceAll(
           RegExp(r'("refreshToken"\s*:\s*")([^"]+)(")', caseSensitive: false),
           r'\1[REDACTED]\3',
-        ); */
+        );
   }
 
   final String _host;

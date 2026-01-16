@@ -8,10 +8,10 @@ import 'package:intern_kassation_app/data/repositories/order_repository.dart';
 import 'package:intern_kassation_app/data/repositories/user_repository.dart';
 import 'package:intern_kassation_app/data/services/api/api_client.dart';
 import 'package:intern_kassation_app/data/services/api/auth_api_client.dart';
-import 'package:intern_kassation_app/data/services/caching_service.dart';
+import 'package:intern_kassation_app/data/services/storage/caching_service.dart';
 import 'package:intern_kassation_app/data/services/image_service.dart';
-import 'package:intern_kassation_app/data/services/secure_storage_service.dart';
-import 'package:intern_kassation_app/data/services/shared_preferences_service.dart';
+import 'package:intern_kassation_app/data/services/storage/secure_storage_service.dart';
+import 'package:intern_kassation_app/data/services/storage/shared_preferences_service.dart';
 import 'package:intern_kassation_app/data/services/uuid_service.dart';
 import 'package:intern_kassation_app/ui/auth/bloc/account_bloc.dart';
 import 'package:intern_kassation_app/ui/scan/cubit/scan_cubit.dart';
@@ -29,7 +29,9 @@ List<SingleChildWidget> _repositories = [
   RepositoryProvider<ApiClient>(create: (context) => ApiClient()),
   RepositoryProvider<SecureStorageService>(create: (context) => const SecureStorageService()),
   RepositoryProvider<SharedPreferencesService>(create: (context) => SharedPreferencesService(SharedPreferencesAsync())),
-  RepositoryProvider<CachingService>(create: (context) => CachingService(sharedPreferencesService: context.read())),
+  RepositoryProvider<CachingService>(
+    create: (context) => CachingService(keyValueStorage: context.read<SharedPreferencesService>()),
+  ),
   RepositoryProvider<UuidService>(create: (context) => UuidService()),
   RepositoryProvider<AuthRepository>(
     lazy: false,

@@ -1,5 +1,5 @@
 import 'package:fpdart/src/either.dart';
-import 'package:intern_kassation_app/data/services/caching_service.dart';
+import 'package:intern_kassation_app/data/services/storage/caching_service.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:clock/clock.dart';
 

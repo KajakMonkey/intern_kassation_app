@@ -8,7 +8,7 @@ import 'package:intern_kassation_app/config/constants/shared_preferences_keys.da
 import 'package:intern_kassation_app/data/services/api/api_client.dart';
 import 'package:intern_kassation_app/data/services/api/models/orders/discarded_order_query_request.dart';
 import 'package:intern_kassation_app/data/services/api/models/orders/order_details_response.dart';
-import 'package:intern_kassation_app/data/services/shared_preferences_service.dart';
+import 'package:intern_kassation_app/data/services/storage/shared_preferences_service.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/product_error_codes.dart';
 import 'package:intern_kassation_app/domain/models/discard/discard_order.dart';

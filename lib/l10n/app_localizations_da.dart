@@ -84,10 +84,16 @@ class AppLocalizationsDa extends AppLocalizations {
   String get scan_use_hardware_scanner => 'Brug scanner';
 
   @override
-  String get scan_manual_entry => 'Manuel indtastning';
+  String get manual_entry => 'Indtast manuelt';
+
+  @override
+  String get enter_a_production_order => 'Indtast en produktionsordre';
 
   @override
   String get scan_or_manual_entry => 'Scan en stregkode eller indtast manuelt';
+
+  @override
+  String get scan_entry => 'Scan en stregkode';
 
   @override
   String get latest_discarded_items => 'Seneste kasserede ordre';
@@ -101,6 +107,9 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get loading_production_order => 'Indlæser produktionsordre';
+
+  @override
+  String get scanner_reset => 'Scanner nulstillet';
 
   @override
   String get correct_barcode_dialog => 'Er stregkoden korrekt?';
@@ -256,7 +265,7 @@ class AppLocalizationsDa extends AppLocalizations {
   String get search => 'Søg';
 
   @override
-  String get discard_lookup_no_results => 'Ingen kasserede ordrer fundet for denne forespørgsel.';
+  String get discard_lookup_no_results => 'Ingen kasserede produktionsordrer fundet for denne forespørgsel.';
 
   @override
   String get next_page => 'Næste side';

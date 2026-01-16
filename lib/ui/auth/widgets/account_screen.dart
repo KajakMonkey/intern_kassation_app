@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:intern_kassation_app/common_index.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/ui/auth/bloc/account_bloc.dart';
@@ -40,7 +38,6 @@ class AccountScreen extends StatelessWidget {
           );
         },
         builder: (context, state) {
-          log('authStatus: ${state.authStatus}\n userStatus: ${state.userStatus}', name: 'AccountScreen');
           final failureState = state.authStatus.maybeMap(
             failure: (f) => f,
             orElse: () => null,

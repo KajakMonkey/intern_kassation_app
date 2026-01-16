@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intern_kassation_app/config/constants/product_type.dart';
+import 'package:intern_kassation_app/config/constants/shared_preferences_keys.dart';
 import 'package:intern_kassation_app/data/repositories/order_repository.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/product_error_codes.dart';
 
@@ -192,7 +193,7 @@ void main() {
         await orderRepository.addDiscardedOrder('PROD456');
 
         // Assert
-        final result = await fakeSharedPreferencesService.getStringList('latest_discarded_orders');
+        final result = await fakeSharedPreferencesService.getStringList(SharedPreferencesKeys.discardedOrders.name);
         result.match(
           (failure) => fail('Expected right but got left: $failure'),
           (value) {
@@ -202,6 +203,11 @@ void main() {
           },
         );
       });
+
+      test(
+        'Should ',
+        () async {},
+      );
     });
     group('getDiscardedOrders', () {});
     group('getDiscardedOrderDetails', () {});

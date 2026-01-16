@@ -1,5 +1,5 @@
 import 'package:fpdart/src/either.dart';
-import 'package:intern_kassation_app/data/services/shared_preferences_service.dart';
+import 'package:intern_kassation_app/data/services/storage/shared_preferences_service.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 
 class FakeSharedPreferencesService implements SharedPreferencesService {
@@ -21,7 +21,7 @@ class FakeSharedPreferencesService implements SharedPreferencesService {
   }
 
   @override
-  Future<Either<AppFailure, String?>> getString(String key) async {
+  Future<Either<AppFailure, String?>> read(String key) async {
     if (overrideStringValue != null) {
       return right(overrideStringValue);
     }
@@ -42,7 +42,7 @@ class FakeSharedPreferencesService implements SharedPreferencesService {
   }
 
   @override
-  Future<Either<AppFailure, void>> remove(String key) async {
+  Future<Either<AppFailure, void>> delete(String key) async {
     _storage.remove(key);
     return right(null);
   }
@@ -54,7 +54,7 @@ class FakeSharedPreferencesService implements SharedPreferencesService {
   }
 
   @override
-  Future<Either<AppFailure, void>> setString(String key, String value) async {
+  Future<Either<AppFailure, void>> write(String key, String value) async {
     _storage[key] = value;
     return right(null);
   }

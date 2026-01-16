@@ -241,17 +241,29 @@ abstract class AppLocalizations {
   /// **'Brug scanner'**
   String get scan_use_hardware_scanner;
 
-  /// No description provided for @scan_manual_entry.
+  /// No description provided for @manual_entry.
   ///
   /// In da, this message translates to:
-  /// **'Manuel indtastning'**
-  String get scan_manual_entry;
+  /// **'Indtast manuelt'**
+  String get manual_entry;
+
+  /// No description provided for @enter_a_production_order.
+  ///
+  /// In da, this message translates to:
+  /// **'Indtast en produktionsordre'**
+  String get enter_a_production_order;
 
   /// No description provided for @scan_or_manual_entry.
   ///
   /// In da, this message translates to:
   /// **'Scan en stregkode eller indtast manuelt'**
   String get scan_or_manual_entry;
+
+  /// No description provided for @scan_entry.
+  ///
+  /// In da, this message translates to:
+  /// **'Scan en stregkode'**
+  String get scan_entry;
 
   /// No description provided for @latest_discarded_items.
   ///
@@ -276,6 +288,12 @@ abstract class AppLocalizations {
   /// In da, this message translates to:
   /// **'Indlæser produktionsordre'**
   String get loading_production_order;
+
+  /// No description provided for @scanner_reset.
+  ///
+  /// In da, this message translates to:
+  /// **'Scanner nulstillet'**
+  String get scanner_reset;
 
   /// No description provided for @correct_barcode_dialog.
   ///
@@ -550,7 +568,7 @@ abstract class AppLocalizations {
   /// No description provided for @discard_lookup_no_results.
   ///
   /// In da, this message translates to:
-  /// **'Ingen kasserede ordrer fundet for denne forespørgsel.'**
+  /// **'Ingen kasserede produktionsordrer fundet for denne forespørgsel.'**
   String get discard_lookup_no_results;
 
   /// No description provided for @next_page.

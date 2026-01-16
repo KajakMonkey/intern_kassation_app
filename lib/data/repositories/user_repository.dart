@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:intern_kassation_app/config/constants/shared_preferences_keys.dart';
 import 'package:intern_kassation_app/data/services/api/api_client.dart';
-import 'package:intern_kassation_app/data/services/caching_service.dart';
+import 'package:intern_kassation_app/data/services/storage/caching_service.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/models/user.dart';
 import 'package:logging/logging.dart';
@@ -58,7 +58,7 @@ class UserRepository {
 
   Future<void> cacheUserData(User user) async {
     final userJson = user.toJson();
-    await _cachingService.write(SharedPreferencesKeys.userData.name, userJson, ttl: const Duration(minutes: 30));
+    await _cachingService.write(SharedPreferencesKeys.userData.name, userJson, ttl: const Duration(hours: 2));
   }
 
   Future<void> clearCachedUserData() async {

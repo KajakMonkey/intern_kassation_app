@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:intern_kassation_app/common_index.dart';
-import 'package:intern_kassation_app/config/env.dart';
 import 'package:intern_kassation_app/routing/router.dart';
 import 'package:intern_kassation_app/ui/core/ui/dialog/error_sheet.dart';
 import 'package:intern_kassation_app/ui/core/ui/shimmer_effect.dart';
@@ -19,21 +18,29 @@ class LookupScreen extends StatefulWidget {
 
 class _LookupScreenState extends State<LookupScreen> with RouteAware {
   late final TextEditingController _controller;
+  late final FocusNode _keyboardFocusNode;
   final _formKey = GlobalKey<FormState>();
 
-  bool _useHardwareScanner = EnvManager.useHardwareScanner;
+  var _useHardwareScanner = false;
 
   final _scanBuffer = StringBuffer();
   Timer? _scanDebounce;
   DateTime? _lastKeyTs;
 
-  static const _scanInterKeyMax = Duration(milliseconds: 40); // keys closer than this -> likely scanner
-  static const _scanTimeout = Duration(milliseconds: 120); // no key for this long -> flush (human typing)
+  static const _scanInterKeyMax = Duration(milliseconds: 40);
+  static const _scanTimeout = Duration(milliseconds: 120);
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _keyboardFocusNode = FocusNode();
+
+    if (_useHardwareScanner) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _keyboardFocusNode.requestFocus();
+      });
+    }
   }
 
   @override
@@ -44,62 +51,55 @@ class _LookupScreenState extends State<LookupScreen> with RouteAware {
 
   @override
   void dispose() {
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.removeHandler(_onHardwareKey);
-    }
-    _scanDebounce?.cancel();
     orderLookupRouteObserver.unsubscribe(this);
+    _scanDebounce?.cancel();
     _controller.dispose();
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
   @override
-  void didPush() {
-    // Route was pushed onto navigator and is now current.
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.addHandler(_onHardwareKey);
-    }
-  }
-
-  @override
   void didPopNext() {
-    // Covering route was popped off the navigator.
     if (_useHardwareScanner) {
-      HardwareKeyboard.instance.addHandler(_onHardwareKey);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _keyboardFocusNode.requestFocus();
+        }
+      });
     }
   }
 
   @override
-  void didPop() {
-    // Route was popped off the navigator.
+  void didPush() {
     if (_useHardwareScanner) {
-      HardwareKeyboard.instance.removeHandler(_onHardwareKey);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _keyboardFocusNode.requestFocus();
+        }
+      });
     }
   }
 
   @override
   void didPushNext() {
-    // Another route was pushed onto the navigator.
-    if (_useHardwareScanner) {
-      HardwareKeyboard.instance.removeHandler(_onHardwareKey);
-    }
+    _keyboardFocusNode.unfocus();
   }
 
-  bool _onHardwareKey(KeyEvent event) {
+  void _onKeyEvent(KeyEvent event) {
     if (event is! KeyDownEvent) {
-      return false;
+      return;
     }
 
     final key = event.logicalKey;
 
     if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter || key == LogicalKeyboardKey.tab) {
-      _lookupOrders();
-      return true;
+      _commitScan();
+      return;
     }
 
     final character = event.character;
     if (character == null || character.isEmpty) {
-      return false;
+      return;
     }
 
     final now = DateTime.now();
@@ -111,9 +111,20 @@ class _LookupScreenState extends State<LookupScreen> with RouteAware {
     _scanBuffer.write(character);
 
     _scanDebounce?.cancel();
-    _scanDebounce = Timer(_scanTimeout, _lookupOrders);
+    _scanDebounce = Timer(_scanTimeout, _commitScan);
+  }
 
-    return true;
+  void _commitScan() {
+    _scanDebounce?.cancel();
+    final value = _scanBuffer.toString().trim();
+    _scanBuffer.clear();
+    _lastKeyTs = null;
+
+    if (value.isNotEmpty) {
+      _controller.text = value;
+    }
+
+    _lookupOrders();
   }
 
   void _lookupOrders() {
@@ -123,113 +134,141 @@ class _LookupScreenState extends State<LookupScreen> with RouteAware {
     }
   }
 
+  void _toggleScannerMode(bool useScanner) {
+    setState(() {
+      _useHardwareScanner = useScanner;
+    });
+
+    if (useScanner) {
+      _keyboardFocusNode.requestFocus();
+    } else {
+      _keyboardFocusNode.unfocus();
+    }
+
+    // Clear scan buffer when switching modes
+    _scanBuffer.clear();
+    _lastKeyTs = null;
+    _scanDebounce?.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.discard_lookup_page_title),
-      ),
-      padding: EdgeInsets.zero,
-      scrollable: false,
-      body: Column(
-        children: [
-          BlocBuilder<LookupCubit, LookupState>(
-            builder: (context, state) {
-              return SegmentedButton<bool>(
-                segments: [
-                  ButtonSegment(
-                    value: true,
-                    label: Text(context.l10n.scan_use_hardware_scanner),
-                    icon: const Icon(Icons.scanner),
-                  ),
-                  ButtonSegment(
-                    value: false,
-                    label: Text(context.l10n.scan_manual_entry),
-                    icon: const Icon(Icons.keyboard),
-                  ),
-                ],
-                selected: {_useHardwareScanner},
-                onSelectionChanged: state != const LookupState.loading()
-                    ? (newSelection) {
-                        final useScanner = newSelection.first;
-                        if (useScanner) {
-                          HardwareKeyboard.instance.addHandler(_onHardwareKey);
-                        } else {
-                          HardwareKeyboard.instance.removeHandler(_onHardwareKey);
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      autofocus: _useHardwareScanner,
+      onKeyEvent: _useHardwareScanner ? _onKeyEvent : null,
+      child: AppScaffold(
+        appBar: AppBar(
+          title: Text(context.l10n.discard_lookup_page_title),
+        ),
+        padding: EdgeInsets.zero,
+        scrollable: false,
+        body: GestureDetector(
+          onTap: _useHardwareScanner ? () => _keyboardFocusNode.requestFocus() : null,
+          behavior: HitTestBehavior.translucent,
+          child: Column(
+            children: [
+              BlocBuilder<LookupCubit, LookupState>(
+                builder: (context, state) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: Gap.m),
+                    child: SegmentedButton<bool>(
+                      segments: [
+                        ButtonSegment(
+                          value: false,
+                          label: Text(context.l10n.manual_entry),
+                          icon: const Icon(Icons.keyboard),
+                        ),
+                        ButtonSegment(
+                          value: true,
+                          label: Text(context.l10n.scan_use_hardware_scanner),
+                          icon: const Icon(Icons.scanner),
+                        ),
+                      ],
+                      selected: {_useHardwareScanner},
+                      onSelectionChanged: state != const LookupState.loading()
+                          ? (newSelection) => _toggleScannerMode(newSelection.first)
+                          : null,
+                    ),
+                  );
+                },
+              ),
+              Gap.vs,
+              SearchForm(
+                textController: _controller,
+                formKey: _formKey,
+                onSubmit: _lookupOrders,
+                readOnly: _useHardwareScanner,
+              ),
+              Gap.vs,
+              Expanded(
+                child: BlocBuilder<LookupCubit, LookupState>(
+                  builder: (context, state) {
+                    return state.when(
+                      initial: () {
+                        return const SizedBox.shrink();
+                      },
+                      loading: () {
+                        return ListView.builder(
+                          itemCount: 5,
+                          itemBuilder: (context, index) => const ShimmerEffect.listTile(),
+                        );
+                      },
+                      loaded: (data, query) {
+                        if (data.items.isEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.all(Gap.m),
+                            child: Column(
+                              crossAxisAlignment: .center,
+                              mainAxisAlignment: .center,
+                              children: [
+                                Icon(Icons.search_off, size: 48, color: context.theme.hintColor),
+                                Gap.vs,
+                                Text(
+                                  context.l10n.discard_lookup_no_results,
+                                  textAlign: .center,
+                                ),
+                              ],
+                            ),
+                          );
                         }
-                        setState(() {
-                          _useHardwareScanner = useScanner;
-                        });
-                      }
-                    : null,
-              );
-            },
-          ),
-          Gap.vs,
-          SearchForm(
-            textController: _controller,
-            formKey: _formKey,
-            onSubmit: _lookupOrders,
-          ),
-          Gap.vs,
-          Expanded(
-            child: BlocBuilder<LookupCubit, LookupState>(
-              builder: (context, state) {
-                return state.when(
-                  initial: () {
-                    return const SizedBox.shrink();
-                  },
-                  loading: () {
-                    return ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) => const ShimmerEffect.listTile(),
-                    );
-                  },
-                  loaded: (data, query) {
-                    if (data.items.isEmpty) {
-                      return Column(
-                        children: [
-                          Icon(Icons.info, size: 48, color: context.theme.hintColor),
-                          Gap.vs,
-                          Text(context.l10n.discard_lookup_no_results),
-                        ],
-                      );
-                    }
 
-                    final hasNextPage = data.nextCursor != null;
-                    final hasPreviousPage = data.previousCursor != null;
+                        final hasNextPage = data.nextCursor != null;
+                        final hasPreviousPage = data.previousCursor != null;
 
-                    return DiscardedOrdersList(
-                      query: query,
-                      items: data.items,
-                      canGoNext: hasNextPage,
-                      canGoPrevious: hasPreviousPage,
+                        return DiscardedOrdersList(
+                          query: query,
+                          items: data.items,
+                          canGoNext: hasNextPage,
+                          canGoPrevious: hasPreviousPage,
+                        );
+                      },
+                      failure: (failure) {
+                        return Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                failure.getMessage(context.l10n),
+                                style: context.textTheme.bodyMedium!.copyWith(color: context.colorScheme.error),
+                              ),
+                              Gap.vs,
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.showErrorSheet(failure: failure);
+                                },
+                                child: Text(context.l10n.view_error_details),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   },
-                  failure: (failure) {
-                    return Center(
-                      child: Column(
-                        children: [
-                          Text(
-                            failure.getMessage(context.l10n),
-                            style: context.textTheme.bodyMedium!.copyWith(color: context.colorScheme.error),
-                          ),
-                          Gap.vs,
-                          ElevatedButton(
-                            onPressed: () {
-                              context.showErrorSheet(failure: failure);
-                            },
-                            child: Text(context.l10n.view_error_details),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

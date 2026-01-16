@@ -7,10 +7,12 @@ class SearchForm extends StatelessWidget {
     required this.textController,
     required this.formKey,
     required this.onSubmit,
+    required this.readOnly,
   });
   final TextEditingController textController;
   final GlobalKey<FormState> formKey;
   final VoidCallback onSubmit;
+  final bool readOnly;
 
   String? _validateOrderNumber(String? value, BuildContext context) {
     if (value == null || value.trim().isEmpty) {
@@ -44,6 +46,7 @@ class SearchForm extends StatelessWidget {
                   controller: textController,
                   validator: (value) => _validateOrderNumber(value, context),
                   enabled: state != const LookupState.loading(),
+                  readOnly: readOnly,
                   decoration: InputDecoration(
                     labelText: '${context.l10n.sales_id} / ${context.l10n.production_order}',
                     border: const OutlineInputBorder(),

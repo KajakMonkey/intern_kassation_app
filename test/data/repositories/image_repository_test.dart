@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
 import 'package:intern_kassation_app/data/repositories/image_repository.dart';
+import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/image_error_codes.dart';
 
 import '../../../testing/fakes/services/fake_image_service.dart';
@@ -94,7 +95,7 @@ void main() {
               expect(result.isLeft(), true);
               result.fold(
                 (failure) {
-                  expect(failure.code, ImageErrorCodes.maxImagesExceeded);
+                  expect(failure, AppFailure(code: ImageErrorCodes.maxImagesExceeded));
                 },
                 (_) => fail('Expected a failure due to max images exceeded'),
               );
@@ -159,7 +160,7 @@ void main() {
               expect(result.isLeft(), true);
               result.fold(
                 (failure) {
-                  expect(failure.code, ImageErrorCodes.maxImagesExceeded);
+                  expect(failure, AppFailure(code: ImageErrorCodes.maxImagesExceeded));
                 },
                 (_) => fail('Expected a failure due to max images exceeded'),
               );
