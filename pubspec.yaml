@@ -1,7 +1,7 @@
 name: intern_kassation_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 2.0.1
 
 environment:
   sdk: ^3.10.0
@@ -44,19 +44,19 @@ dependencies:
   package_info_plus: ^9.0.0
   uuid: ^4.5.2
   mime: ^2.0.0
+  path: ^1.9.1
 
   # UI & scanning
   mobile_scanner: ^7.1.2
   shimmer: ^3.0.0
   image_picker: ^1.2.1
-  path: ^1.9.1
 
 dev_dependencies:
 # Flutter test SDKs
   flutter_test:
     sdk: flutter
-  integration_test:
-    sdk: flutter
+  # integration_test:
+  #  sdk: flutter
 
   # Testing & assertions
   clock: ^1.1.2

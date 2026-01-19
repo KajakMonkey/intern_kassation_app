@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   await EnvManager.init(Environment.production);
+  await setTrustedCertificates();
   runApp(MultiProvider(providers: sharedProviders, child: const MainApp()));
 }
 

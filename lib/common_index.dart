@@ -7,3 +7,4 @@ export 'package:intern_kassation_app/ui/core/extensions/theme_extension.dart';
 export 'package:intern_kassation_app/ui/core/ui/app_scaffold.dart';
 export 'package:flutter_bloc/flutter_bloc.dart';
 export 'package:intern_kassation_app/ui/core/ui/gap.dart';
+export 'package:intern_kassation_app/utils/set_trusted_certificate.dart';

@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 void main() async {
   await EnvManager.init(Environment.development);
+  await setTrustedCertificates();
   Logger.root.level = Level.ALL;
 
   Logger('MainDevelopment').info('Starting app in DEVELOPMENT mode with API URL: ${EnvManager.apiUrl}');

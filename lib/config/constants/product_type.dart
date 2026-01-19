@@ -34,6 +34,7 @@ enum ProductType {
   };
 
   bool get isStoneProduct => switch (this) {
+    ProductType.granit ||
     ProductType.fokusCorian ||
     ProductType.corian ||
     ProductType.compactGranite ||
@@ -42,7 +43,7 @@ enum ProductType {
     ProductType.kvikDekton ||
     ProductType.terrazzo ||
     ProductType.ceramics ||
-    ProductType.granit => true,
+    ProductType.kvikKermik => true,
     _ => false,
   };
 }
