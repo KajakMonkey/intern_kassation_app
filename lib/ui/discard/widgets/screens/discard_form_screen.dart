@@ -20,12 +20,14 @@ class DiscardFormScreen extends StatefulWidget {
     required this.salesId,
     required this.worktop,
     required this.productType,
+    required this.productGroup,
     required this.productionOrder,
   });
 
   final String salesId;
   final String worktop;
   final ProductType productType;
+  final String productGroup;
   final String productionOrder;
 
   @override
@@ -169,7 +171,6 @@ class _DiscardFormScreenState extends State<DiscardFormScreen> {
       },
       child: AppScaffold(
         appBar: AppBar(
-          backgroundColor: Colors.grey,
           title: Text('${widget.productionOrder} - ${widget.productType.code}'),
           automaticallyImplyLeading: false,
           leading: _navConfig.showAppBarBackButton
@@ -266,6 +267,7 @@ class _DiscardFormScreenState extends State<DiscardFormScreen> {
       DiscardFormStep.unknown => UnknownStep(
         onNavConfigChanged: (value) => _onStepNavConfigChanged(index, value),
         isLastStep: isLastStep,
+        productGroup: widget.productGroup,
       ),
     };
   }

@@ -7,18 +7,19 @@ import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/models/auth/auth_repo_response.dart';
 import 'package:intern_kassation_app/routing/parameters.dart';
 import 'package:intern_kassation_app/routing/routes.dart';
-import 'package:intern_kassation_app/ui/auth/widgets/account_screen.dart';
+import 'package:intern_kassation_app/ui/auth/widgets/screens/account_screen.dart';
+import 'package:intern_kassation_app/ui/core/ui/screens/page_not_found_screen.dart';
 import 'package:intern_kassation_app/ui/core/ui/screens/technical_details_screen.dart';
 import 'package:intern_kassation_app/ui/discard/cubit/discard_cubit.dart';
-import 'package:intern_kassation_app/ui/discard/widgets/discard_form_screen.dart';
+import 'package:intern_kassation_app/ui/discard/widgets/screens/discard_form_screen.dart';
 import 'package:intern_kassation_app/ui/lookup/cubits/lookup_cubit/lookup_cubit.dart';
 import 'package:intern_kassation_app/ui/lookup/cubits/lookup_details_cubit/lookup_details_cubit.dart';
-import 'package:intern_kassation_app/ui/lookup/widgets/lookup_details_screen.dart';
+import 'package:intern_kassation_app/ui/lookup/widgets/screens/lookup_details_screen.dart';
 import 'package:intern_kassation_app/ui/lookup/widgets/lookup_screen.dart';
-import 'package:intern_kassation_app/ui/scan/widgets/camra_scan_screen.dart';
-import 'package:intern_kassation_app/ui/scan/widgets/manual_scan_screen.dart';
-import 'package:intern_kassation_app/ui/scan/widgets/scan_screen.dart';
-import 'package:intern_kassation_app/ui/splash/widgets/splash_screen.dart';
+import 'package:intern_kassation_app/ui/scan/widgets/screens/camra_scan_screen.dart';
+import 'package:intern_kassation_app/ui/scan/widgets/screens/manual_scan_screen.dart';
+import 'package:intern_kassation_app/ui/scan/widgets/screens/scan_screen.dart';
+import 'package:intern_kassation_app/ui/splash/widgets/screens/splash_screen.dart';
 import 'package:intern_kassation_app/utils/stream_listenable.dart';
 
 final scanRouteObserver = RouteObserver<ModalRoute<void>>();
@@ -31,9 +32,21 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
   routes: _appRoutes,
   refreshListenable: StreamListenable(authRepository.stream),
   redirect: (context, state) => _redirect(context, state, authRepository),
+  errorBuilder: (context, state) => PageNotFoundScreen(
+    error: state.error,
+    uri: state.uri,
+  ),
 );
 
 final _appRoutes = <GoRoute>[
+  GoRoute(
+    name: Routes.test.name,
+    path: Routes.test.path,
+    builder: (context, state) => PageNotFoundScreen(
+      error: GoException('Test Route Exception'),
+      uri: state.uri,
+    ),
+  ),
   GoRoute(
     name: Routes.splash.name,
     path: Routes.splash.path,
@@ -71,12 +84,13 @@ final _appRoutes = <GoRoute>[
       final worktop = state.uri.queryParameters[DiscardRouteParams.worktop];
       final productTypeCode = state.uri.queryParameters[DiscardRouteParams.productType];
       final productionOrder = state.uri.queryParameters[DiscardRouteParams.produktionsOrder];
+      final productGroup = state.uri.queryParameters[DiscardRouteParams.productGroup];
 
       final productType = productTypeCode != null ? ProductType.fromCode(productTypeCode) : ProductType.unknown;
 
-      if (salesId == null || worktop == null || productionOrder == null || productType == ProductType.unknown) {
+      if (salesId == null || worktop == null || productionOrder == null || productGroup == null) {
         throw Exception(
-          'Missing or invalid parameters for DiscardPage: salesId: $salesId, worktop: $worktop, productionOrder: $productionOrder, productType: $productTypeCode',
+          'Missing or invalid parameters for DiscardPage: salesId: $salesId, worktop: $worktop, productionOrder: $productionOrder, productType: $productTypeCode, productGroup: $productGroup',
         );
       }
 
@@ -92,6 +106,7 @@ final _appRoutes = <GoRoute>[
           worktop: worktop,
           productType: productType,
           productionOrder: productionOrder,
+          productGroup: productGroup,
         ),
       );
     },

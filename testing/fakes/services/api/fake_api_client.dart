@@ -8,9 +8,13 @@ import 'package:intern_kassation_app/domain/errors/error_codes/network_error_cod
 import 'package:intern_kassation_app/domain/errors/error_codes/product_error_codes.dart';
 import 'package:intern_kassation_app/domain/models/models_index.dart';
 
+import '../../../models/fake_discarded_order_details.dart';
+
 class FakeApiClient implements ApiClient {
   var requestCount = 0;
   var shouldFail = false;
+
+  static const _constantDateTime = '2026-01-01T12:00:00Z';
 
   @override
   AuthHeaderProvider? authHeaderProvider;
@@ -18,6 +22,16 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Either<AppFailure, List<DiscardReason>>> getDiscardReasons(String productType) async {
     requestCount++;
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
+
     return right(
       [
         DiscardReason(
@@ -39,26 +53,32 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Either<AppFailure, DiscardedOrderDetails>> getDiscardedOrderDetails(int id) async {
     requestCount++;
-    return right(
-      DiscardedOrderDetails(
-        id: id,
-        prodId: 'PROD123',
-        salesId: 'SAL456',
-        discardedAtUtc: DateTime.now(),
-        employeeId: 'EMP789',
-        errorCode: 'E001',
-        note: 'Sample discarded order',
-        productType: 'TypeA',
-        worktop: 'Worktop1',
-        errorDescription: 'Defective item',
-        machineName: 'MachineX',
-      ),
-    );
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
+
+    return right(kDiscardedOrderDetails);
   }
 
   @override
   Future<Either<AppFailure, DiscardedOrdersData>> getDiscardedOrders(DiscardedOrderQueryRequest request) async {
     requestCount++;
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
+
     return right(
       DiscardedOrdersData(
         pageSize: 25,
@@ -67,9 +87,17 @@ class FakeApiClient implements ApiClient {
             id: 1,
             prodId: 'PROD123',
             salesId: 'SAL456',
-            discardedAtUtc: DateTime.now(),
+            discardedAtUtc: DateTime.parse(_constantDateTime),
             errorCode: 'E001',
             productType: 'TypeA',
+          ),
+          DiscardedOrderPreview(
+            id: 2,
+            prodId: 'PROD789',
+            salesId: 'SAL012',
+            discardedAtUtc: DateTime.parse(_constantDateTime),
+            errorCode: 'E002',
+            productType: 'TypeB',
           ),
         ],
       ),
@@ -79,6 +107,16 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Either<AppFailure, List<String>>> getDropdownValues(String category) async {
     requestCount++;
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
+
     return right(
       ['CNC', 'Assembly', 'Packaging'],
     );
@@ -87,6 +125,16 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Either<AppFailure, Employee>> getEmployeeDetails(String employeeId) async {
     requestCount++;
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
+
     return right(
       Employee(id: employeeId, name: 'John Doe'),
     );
@@ -95,6 +143,15 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Either<AppFailure, OrderDetailsResponse>> getOrderDetails(String productionOrder) async {
     requestCount++;
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
 
     if (productionOrder == 'PROD_UNKNOWN') {
       return left(
@@ -139,6 +196,19 @@ class FakeApiClient implements ApiClient {
   @override
   Future<Either<AppFailure, void>> submitDiscardOrder(FormData formData, String productionOrder) async {
     requestCount++;
+
+    if (shouldFail) {
+      return left(
+        AppFailure(
+          code: NetworkErrorCodes.connectionTimeout,
+          context: {'message': 'API request failed'},
+        ),
+      );
+    }
+
     return right(null);
   }
+
+  @override
+  Future<void> dispose() async {}
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_smart_retry/dio_smart_retry.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:intern_kassation_app/config/api_endpoints.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
 import 'package:intern_kassation_app/config/env.dart';
 import 'package:intern_kassation_app/data/services/api/models/auth/auth_index.dart';
@@ -14,15 +15,13 @@ import 'package:logging/logging.dart';
 
 class AuthApiClient {
   AuthApiClient({
-    String? host,
     Dio? client,
-  }) : _host = host ?? EnvManager.apiUrl,
-       _client = client ?? _defaultDioFactory(EnvManager.apiUrl);
+  }) : _client = client ?? _defaultDioFactory();
 
-  static Dio _defaultDioFactory(String host) {
+  static Dio _defaultDioFactory() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: host,
+        baseUrl: EnvManager.apiUrl,
         connectTimeout: AppConfig.httpTimeout,
         receiveTimeout: AppConfig.httpReceiveTimeout,
         sendTimeout: AppConfig.httpSendTimeout,
@@ -63,87 +62,65 @@ class AuthApiClient {
         );
   }
 
-  final String _host;
   final Dio _client;
   static final _logger = Logger('AuthApiClient');
 
-  Future<Either<AppFailure, Token>> login(LoginRequest request) async {
+  Future<Either<AppFailure, Token>> login(LoginRequest r) => _executeRequest<Token>(
+    request: () => _client.post<String>(ApiEndpoints.login, data: r.toJson()),
+    parseSuccess: (s) => Token.fromJson(s),
+    action: 'login',
+  );
+
+  Future<Either<AppFailure, Token>> refresh(RefreshRequest r) => _executeRequest<Token>(
+    request: () => _client.post<String>(ApiEndpoints.refresh, data: r.toJson()),
+    parseSuccess: (s) => Token.fromJson(s),
+    action: 'refresh',
+  );
+
+  Future<Either<AppFailure, void>> logout(LogoutRequest r) => _executeRequest<void>(
+    request: () => _client.post<String>(ApiEndpoints.logout, data: r.toJson()),
+    parseSuccess: (_) {},
+    action: 'logout',
+  );
+
+  Future<Either<AppFailure, T>> _executeRequest<T>({
+    required Future<Response<String>> Function() request,
+    required T Function(String) parseSuccess,
+    required String action,
+  }) async {
     try {
-      final response = await _client.post<String>(
-        '$_host/auth/login',
-        data: request.toJson(),
-      );
-      if (response.statusCode == 200) {
-        final token = Token.fromJson(response.data!);
-        return right(token);
-      } else {
-        try {
-          final problem = ProblemDetails.fromJson(response.data!);
-          return left(AppFailure.fromProblemDetails(problem));
-        } catch (_) {
-          _logger.warning('Failed to parse ProblemDetails from response: ${response.data}');
-          return left(AppFailure(code: ValidationErrorCodes.parsingError, context: {'responseData': response.data}));
-        }
-      }
+      final response = await request();
+      return _handleResponse<T>(response, parseSuccess, action);
     } on DioException catch (e) {
-      _logger.severe('DioException during login: ${e.message}', e);
+      _logger.severe('DioException during $action: ${e.message}', e);
       return left(e.type.toAppFailure());
-    } catch (e) {
-      _logger.severe('Unknown exception during login: ${e.toString()}', e);
-      return left(AppFailure(code: AuthErrorCode.unknown, context: {'message': e.toString()}));
     }
   }
 
-  Future<Either<AppFailure, Token>> refresh(RefreshRequest request) async {
-    try {
-      final response = await _client.post<String>(
-        '$_host/auth/refresh',
-        data: request.toJson(),
-      );
-      if (response.statusCode == 200) {
-        final token = Token.fromJson(response.data!);
-        return right(token);
-      } else {
-        try {
-          final problem = ProblemDetails.fromJson(response.data!);
-          return left(AppFailure.fromProblemDetails(problem));
-        } catch (_) {
-          _logger.warning('Failed to parse ProblemDetails from response: ${response.data}');
-          return left(AppFailure(code: ValidationErrorCodes.parsingError, context: {'responseData': response.data}));
-        }
+  Either<AppFailure, T> _handleResponse<T>(
+    Response<String> response,
+    T Function(String) parseSuccess,
+    String action,
+  ) {
+    if (response.statusCode == 200) {
+      try {
+        return right(parseSuccess(response.data!));
+      } catch (_) {
+        _logger.warning('Failed to parse success response for $action: ${response.data}');
+        return left(AppFailure(code: ValidationErrorCodes.parsingError, context: {'responseData': response.data}));
       }
-    } on DioException catch (e) {
-      _logger.severe('DioException during refresh: ${e.message}', e);
-      return left(e.type.toAppFailure());
-    } catch (e) {
-      _logger.severe('Unknown exception during refresh: ${e.toString()}', e);
-      return left(AppFailure(code: AuthErrorCode.unknown, context: {'message': e.toString()}));
+    } else {
+      try {
+        final problem = ProblemDetails.fromJson(response.data!);
+        return left(AppFailure.fromProblemDetails(problem));
+      } catch (_) {
+        _logger.warning('Failed to parse ProblemDetails from response: ${response.data}');
+        return left(AppFailure(code: ValidationErrorCodes.parsingError, context: {'responseData': response.data}));
+      }
     }
   }
 
-  Future<Either<AppFailure, void>> logout(LogoutRequest request) async {
-    try {
-      final response = await _client.post<String>(
-        '$_host/auth/logout',
-        data: request.toJson(),
-      );
-      if (response.statusCode == 200) {
-        return right(null);
-      } else {
-        try {
-          final problem = ProblemDetails.fromJson(response.data!);
-          return left(AppFailure.fromProblemDetails(problem));
-        } catch (_) {
-          _logger.warning('Failed to parse ProblemDetails from response: ${response.data}');
-          return left(AppFailure(code: ValidationErrorCodes.parsingError, context: {'responseData': response.data}));
-        }
-      }
-    } on DioException catch (e) {
-      _logger.severe('DioException during logout: ${e.message}', e);
-      return left(e.type.toAppFailure());
-    } catch (e) {
-      _logger.severe('Unknown exception during logout: ${e.toString()}', e);
-      return left(AppFailure(code: AuthErrorCode.unknown, context: {'message': e.toString()}));
-    }
+  Future<void> dispose() async {
+    _client.close();
   }
 }

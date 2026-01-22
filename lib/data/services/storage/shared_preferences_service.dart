@@ -68,6 +68,7 @@ class SharedPreferencesService implements KeyValueStorage {
     }
   }
 
+  @override
   Future<Either<AppFailure, List<String>?>> getStringList(String key) async {
     try {
       final value = await _sharedPreferences.getStringList(key);
@@ -78,12 +79,35 @@ class SharedPreferencesService implements KeyValueStorage {
     }
   }
 
+  @override
   Future<Either<AppFailure, void>> setStringList(String key, List<String> value) async {
     try {
       await _sharedPreferences.setStringList(key, value);
       return right(null);
     } catch (e, st) {
       _logger.severe('Error writing string list to SharedPreferences', e, st);
+      return left(AppFailure(code: StorageErrorCodes.sharedPrefsReadError, context: {'key': key, 'value': value}));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, bool?>> getBool(String key) async {
+    try {
+      final value = await _sharedPreferences.getBool(key);
+      return right(value);
+    } catch (e, st) {
+      _logger.severe('Error reading bool from SharedPreferences', e, st);
+      return left(AppFailure(code: StorageErrorCodes.sharedPrefsReadError, context: {'key': key}));
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, void>> setBool(String key, bool value) async {
+    try {
+      await _sharedPreferences.setBool(key, value);
+      return right(null);
+    } catch (e, st) {
+      _logger.severe('Error writing bool to SharedPreferences', e, st);
       return left(AppFailure(code: StorageErrorCodes.sharedPrefsReadError, context: {'key': key, 'value': value}));
     }
   }

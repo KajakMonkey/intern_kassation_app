@@ -7,7 +7,8 @@ enum Routes {
   discard(name: 'discard', path: '/discard', fullPath: '/discard'),
   technicalDetails(name: 'technicalDetails', path: '/technical-details', fullPath: '/technical-details'),
   lookup(name: 'lookup', path: '/lookup', fullPath: '/lookup'),
-  lookupDetails(name: 'discardDetails', path: '/lookup/discard-details', fullPath: '/lookup/discard-details')
+  lookupDetails(name: 'discardDetails', path: '/lookup/discard-details', fullPath: '/lookup/discard-details'),
+  test(name: 'test', path: '/test', fullPath: '/test')
   ;
 
   const Routes({required this.name, required this.path, required this.fullPath});

@@ -274,6 +274,20 @@ class DiscardCubit extends Cubit<DiscardState> {
       orElse: () => ('', ''),
     );
 
+    if (employeeId.isEmpty || employeeName.isEmpty) {
+      emit(
+        state.copyWith(
+          submitState: SubmitState.failure(
+            failure: AppFailure(
+              code: ValidationErrorCodes.invalidEmployeeId,
+              context: {'message': 'Valid employee information is required.'},
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+
     final result = await _orderRepository.discardOrder(
       DiscardOrder(
         productionOrder: state.formData.productionOrder,

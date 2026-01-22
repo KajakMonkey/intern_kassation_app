@@ -89,6 +89,7 @@ class _ManualScanScreenState extends State<ManualScanScreen> {
               salesId: details.salesId,
               worktop: details.worktop,
               productType: details.productType,
+              productGroup: details.productGroup,
               produktionsOrder: details.productionOrder,
             );
           },

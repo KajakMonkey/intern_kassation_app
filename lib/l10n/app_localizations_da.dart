@@ -132,6 +132,16 @@ class AppLocalizationsDa extends AppLocalizations {
   }
 
   @override
+  String get unknown_step_error => 'Ukendt produktgruppe';
+
+  @override
+  String get unknown_step_description =>
+      'Appen understøtter ikke denne produktgruppe, hvis du mener, at dette er en fejl, kontakt venligst IT-afdelingen.';
+
+  @override
+  String get go_to_main_menu => 'Gå til hovedmenu';
+
+  @override
   String get invalid_employee_id => 'Ugyldigt medarbejder ID';
 
   @override
@@ -400,6 +410,10 @@ class AppLocalizationsDa extends AppLocalizations {
   String get error_validation_api_error => 'Der opstod en fejl under kommunikation med serveren.';
 
   @override
+  String get error_validation_invalid_employee_id =>
+      'Ugyldig medarbejder. Gå tilbage og indtast et gyldigt medarbejder ID.';
+
+  @override
   String get error_validation_missing_discard_reason => 'Årsag til kassation mangler.';
 
   @override
@@ -466,4 +480,15 @@ class AppLocalizationsDa extends AppLocalizations {
 
   @override
   String get view_error_details => 'Vis fejldetaljer';
+
+  @override
+  String get page_not_found_title => 'Side ikke fundet';
+
+  @override
+  String get page_not_found_description => 'Den side, du leder efter, findes ikke.';
+
+  @override
+  String page_not_found_requested_uri(String requestedUri) {
+    return 'Anmodet URI: $requestedUri';
+  }
 }

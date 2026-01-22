@@ -13,6 +13,7 @@ class AppNavigator {
     required String salesId,
     required String worktop,
     required ProductType productType,
+    required String productGroup,
     required String produktionsOrder,
   }) {
     context.pushNamed(
@@ -21,6 +22,26 @@ class AppNavigator {
         DiscardRouteParams.salesId: salesId,
         DiscardRouteParams.worktop: worktop,
         DiscardRouteParams.productType: productType.code,
+        DiscardRouteParams.productGroup: productGroup,
+        DiscardRouteParams.produktionsOrder: produktionsOrder,
+      },
+    );
+  }
+
+  void goDiscardPage({
+    required String salesId,
+    required String worktop,
+    required ProductType productType,
+    required String productGroup,
+    required String produktionsOrder,
+  }) {
+    context.goNamed(
+      Routes.discard.name,
+      queryParameters: {
+        DiscardRouteParams.salesId: salesId,
+        DiscardRouteParams.worktop: worktop,
+        DiscardRouteParams.productType: productType.code,
+        DiscardRouteParams.productGroup: productGroup,
         DiscardRouteParams.produktionsOrder: produktionsOrder,
       },
     );

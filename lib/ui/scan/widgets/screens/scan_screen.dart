@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:intern_kassation_app/common_index.dart';
+import 'package:intern_kassation_app/config/constants/product_type.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/error_codes_index.dart';
 import 'package:intern_kassation_app/routing/navigator.dart';
 import 'package:intern_kassation_app/routing/router.dart';
@@ -180,10 +181,11 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
         state.orderStatus.maybeWhen(
           success: (details) {
             _ordrenrController.clear();
-            context.navigator.pushDiscardPage(
+            context.navigator.goDiscardPage(
               salesId: details.salesId,
               worktop: details.worktop,
               productType: details.productType,
+              productGroup: details.productGroup,
               produktionsOrder: details.productionOrder,
             );
           },
@@ -294,6 +296,18 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
                     ),
                   ),
                   Gap.vl,
+                  ElevatedButton(
+                    onPressed: () {
+                      context.navigator.pushDiscardPage(
+                        salesId: 'tst123',
+                        worktop: 'A',
+                        productType: ProductType.unknown,
+                        productGroup: 'GA',
+                        produktionsOrder: 'test123',
+                      );
+                    },
+                    child: Text('to test page'),
+                  ),
                   const LatestDiscardedList(),
                 ],
               ),

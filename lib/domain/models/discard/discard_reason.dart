@@ -36,14 +36,4 @@ extension DiscardReasonExtension on DiscardReason {
     final jsonList = reasons.map((e) => e.toMap()).toList();
     return jsonEncode(jsonList);
   }
-
-  /* static List<DiscardReason> fromJsonList(String jsonList) {
-    final decoded = jsonDecode(jsonList) as List<dynamic>;
-    return decoded.map((e) => DiscardReason.fromJson(e as String)).toList();
-  }
-
-  static String toJsonList(List<DiscardReason> reasons) {
-    final jsonList = reasons.map((e) => e.toJson()).toList();
-    return jsonEncode(jsonList);
-  } */
 }

@@ -90,7 +90,7 @@ class _DiscardReasonDialogState extends State<DiscardReasonDialog> {
                       child: Text(l10n.cancel),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  Gap.hs,
                   Expanded(
                     child: FilledButton(
                       onPressed: _submit,

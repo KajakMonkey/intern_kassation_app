@@ -5,4 +5,9 @@ class DiscardReasonResponse {
   DiscardReasonResponse({required this.reasons, this.failure});
   final List<DiscardReason> reasons;
   final AppFailure? failure;
+
+  @override
+  String toString() {
+    return 'DiscardReasonResponse(reasons: $reasons, failure: $failure)';
+  }
 }

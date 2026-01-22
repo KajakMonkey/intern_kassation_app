@@ -8,8 +8,11 @@ import 'package:intern_kassation_app/domain/errors/error_codes/auth_error_codes.
 import 'package:intern_kassation_app/domain/models/auth/token.dart';
 
 class FakeAuthApiClient implements AuthApiClient {
+  var requestCount = 0;
+
   @override
   Future<Either<AppFailure, Token>> login(LoginRequest request) async {
+    requestCount++;
     if (request.username == 'testuser' && request.password == 'password123') {
       return right(
         Token(
@@ -26,6 +29,7 @@ class FakeAuthApiClient implements AuthApiClient {
 
   @override
   Future<Either<AppFailure, void>> logout(LogoutRequest request) async {
+    requestCount++;
     if (request.refreshToken == 'fake_refresh_token') {
       return right(null);
     }
@@ -35,6 +39,7 @@ class FakeAuthApiClient implements AuthApiClient {
 
   @override
   Future<Either<AppFailure, Token>> refresh(RefreshRequest request) async {
+    requestCount++;
     if (request.refreshToken == 'fake_refresh_token') {
       return right(
         Token(
@@ -48,4 +53,7 @@ class FakeAuthApiClient implements AuthApiClient {
 
     return left(AppFailure(code: AuthErrorCode.invalidRefreshToken));
   }
+
+  @override
+  Future<void> dispose() async {}
 }

@@ -58,10 +58,23 @@ class ApiClient {
 
   static String _redactAuth(Object? obj) {
     final s = obj?.toString() ?? '';
-    return s.replaceAll(
-      RegExp(r'^\s*(authorization:\s*)Bearer\s+\S+', caseSensitive: false, multiLine: true),
-      r' authorization: Bearer [REDACTED]',
-    );
+    return s
+        .replaceAll(
+          RegExp(r'^\s*(authorization:\s*)Bearer\s+\S+', caseSensitive: false, multiLine: true),
+          r' authorization: Bearer [REDACTED]',
+        )
+        .replaceAll(
+          RegExp(r'("password"\s*:\s*")([^"]+)(")', caseSensitive: false),
+          r'\1[REDACTED]\3',
+        )
+        .replaceAll(
+          RegExp(r'("accessToken"\s*:\s*")([^"]+)(")', caseSensitive: false),
+          r'\1[REDACTED]\3',
+        )
+        .replaceAll(
+          RegExp(r'("refreshToken"\s*:\s*")([^"]+)(")', caseSensitive: false),
+          r'\1[REDACTED]\3',
+        );
   }
 
   final Dio _client;
@@ -117,7 +130,7 @@ class ApiClient {
       ApiEndpoints.getDiscardedOrders,
       data: request.toJson(),
     ),
-    (data) => DiscardedOrdersDataX.parseFromJson(data),
+    (data) => DiscardedOrdersData.fromJson(data),
   );
 
   Future<Either<AppFailure, DiscardedOrderDetails>> getDiscardedOrderDetails(int id) => _request(
@@ -239,5 +252,9 @@ class ApiClient {
 
     _logger.severe('Unexpected error in $name', error, stackTrace);
     return left(AppFailure(code: NetworkErrorCodes.unknown, context: {'error': error.toString()}));
+  }
+
+  Future<void> dispose() async {
+    _client.close();
   }
 }

@@ -59,26 +59,7 @@ class AuthRepository {
     yield* _controller.stream;
   })().asBroadcastStream();
 
-  // Update getter
   Stream<AuthRepoResponse> get stream => _statusStream;
-
-  /* Stream<AuthRepoResponse> get stream async* {
-    _logger.info('Starting authentication status stream');
-    const loading = AuthRepoResponse(status: AuthResponseStatus.loading);
-    _currentResponse = loading;
-    yield loading;
-
-    final result = await _trySilentAuthentication();
-    if (result != null) {
-      _currentResponse = result;
-      yield result;
-    } else {
-      const unauth = AuthRepoResponse(status: AuthResponseStatus.unauthenticated);
-      _currentResponse = unauth;
-      yield unauth;
-    }
-    yield* _controller.stream;
-  } */
 
   Future<AuthRepoResponse?> _trySilentAuthentication() async {
     _logger.info('Attempting silent authentication');
@@ -100,9 +81,7 @@ class AuthRepository {
       final result = await refresh();
       return result.fold(
         (failure) => AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: true),
-        (entity) async {
-          return entity;
-        },
+        (entity) => entity,
       );
     }
 
@@ -279,10 +258,6 @@ class AuthRepository {
       return left(failure);
     }
 
-    _logger.info(
-      'getToken: Retrieved token with access token expiry: ${token.refreshToken}, refresh token expiry: ${token.refreshTokenExpiresUtc}',
-    );
-
     if (token.hasValidAccessToken) {
       return right(token);
     }
@@ -358,7 +333,6 @@ class AuthRepository {
   }
 
   Future<Token?> _loadToken() async {
-    _logger.info('Loading token from secure storage');
     final result = await _secureStorageService.read(SecureStorageKeys.token.name);
     if (result.isLeft()) return null;
 
@@ -366,11 +340,7 @@ class AuthRepository {
     if (raw == null) return null;
 
     try {
-      _logger.info('Token found in secure storage, parsing token');
       final token = Token.fromJson(raw);
-      _logger.info(
-        'Loaded token with refresh token: ${token.refreshToken} - Refresh token expiry: ${token.refreshTokenExpiresUtc}',
-      );
       _cachedToken = token;
       return token;
     } catch (e) {
@@ -389,5 +359,9 @@ class AuthRepository {
   void _emit(AuthRepoResponse response) {
     _currentResponse = response;
     _controller.add(response);
+  }
+
+  Future<void> dispose() async {
+    await _controller.close();
   }
 }

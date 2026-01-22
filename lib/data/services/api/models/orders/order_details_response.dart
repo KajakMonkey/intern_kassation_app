@@ -30,6 +30,7 @@ extension OrderDetailsResponseX on OrderDetailsResponse {
       salesId: salesId,
       worktop: worktop,
       productType: productType,
+      productGroup: this.productType,
       productionOrder: productionOrder,
     );
   }

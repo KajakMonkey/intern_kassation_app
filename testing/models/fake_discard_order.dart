@@ -1,12 +1,14 @@
 import 'package:intern_kassation_app/config/constants/product_type.dart';
 import 'package:intern_kassation_app/domain/models/discard/discard_order.dart';
 
+import 'fake_data_time.dart';
+
 final kDiscardOrder = DiscardOrder(
   productionOrder: 'PROD123',
   errorCode: 'ERR001',
   note: 'Defective item',
   employeeId: 'EMP456',
-  reportDate: DateTime.now(),
+  reportDate: kDateTime,
   salesId: 'SAL789',
   worktop: 'WorktopA',
   productType: ProductType.granit,
@@ -18,7 +20,7 @@ final kDiscardOrderWithImages = DiscardOrder(
   errorCode: 'ERR001',
   note: 'Defective item',
   employeeId: 'EMP456',
-  reportDate: DateTime.now(),
+  reportDate: kDateTime,
   salesId: 'SAL789',
   worktop: 'WorktopA',
   productType: ProductType.granit,

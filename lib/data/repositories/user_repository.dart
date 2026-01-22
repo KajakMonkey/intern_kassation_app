@@ -32,7 +32,7 @@ class UserRepository {
         return left(failure);
       },
       (user) async {
-        await cacheUserData(user);
+        await _cacheUserData(user);
         return right(user);
       },
     );
@@ -56,7 +56,7 @@ class UserRepository {
     );
   }
 
-  Future<void> cacheUserData(User user) async {
+  Future<void> _cacheUserData(User user) async {
     final userJson = user.toJson();
     await _cachingService.write(SharedPreferencesKeys.userData.name, userJson, ttl: const Duration(hours: 2));
   }

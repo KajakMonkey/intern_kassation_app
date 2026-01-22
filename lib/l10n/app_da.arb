@@ -55,6 +55,10 @@
             }
         }
     },
+    "@_Unknown_Step": {},
+    "unknown_step_error": "Ukendt produktgruppe",
+    "unknown_step_description": "Appen understøtter ikke denne produktgruppe, hvis du mener, at dette er en fejl, kontakt venligst IT-afdelingen.",
+    "go_to_main_menu": "Gå til hovedmenu",
     "@_Employee_Step": {},
     "invalid_employee_id": "Ugyldigt medarbejder ID",
     "employee": "Medarbejder",
@@ -177,6 +181,7 @@
     "error_validation_invalid_json_format": "Ugyldigt JSON-format.",
     "error_validation_parsing_error": "Fejl under behandling af data.",
     "error_validation_api_error": "Der opstod en fejl under kommunikation med serveren.",
+    "error_validation_invalid_employee_id": "Ugyldig medarbejder. Gå tilbage og indtast et gyldigt medarbejder ID.",
     "error_validation_missing_discard_reason": "Årsag til kassation mangler.",
     "@_Network_Error_Codes": {},
     "error_network_unknown": "Der opstod en ukendt netværksfejl.",
@@ -202,5 +207,16 @@
     "error_product_defects_not_found": "Der blev ikke fundet nogen produktdefekter for dette produkttype.",
     "@_Technical_Details": {},
     "view_technical_details": "Vis tekniske detaljer",
-    "view_error_details": "Vis fejldetaljer"
+    "view_error_details": "Vis fejldetaljer",
+    "@_Page_Not_Found_Screen": {},
+    "page_not_found_title": "Side ikke fundet",
+    "page_not_found_description": "Den side, du leder efter, findes ikke.",
+    "page_not_found_requested_uri": "Anmodet URI: {requestedUri}",
+    "@page_not_found_requested_uri": {
+        "placeholders": {
+            "requestedUri": {
+                "type": "String"
+            }
+        }
+    }
 }

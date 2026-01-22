@@ -1,14 +1,18 @@
 import 'dart:developer';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intern_kassation_app/config/app_config.dart';
 import 'package:intern_kassation_app/config/constants/product_type.dart';
 import 'package:intern_kassation_app/config/constants/shared_preferences_keys.dart';
 import 'package:intern_kassation_app/data/repositories/order_repository.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/product_error_codes.dart';
+import 'package:intern_kassation_app/domain/errors/error_codes/storage_error_codes.dart';
+import 'package:intern_kassation_app/domain/models/order/discarded_order_preview.dart';
 
 import '../../../testing/fakes/services/api/fake_api_client.dart';
 import '../../../testing/fakes/services/fake_shared_preferences_service.dart';
-import '../../../testing/models/discard_order.dart';
+import '../../../testing/models/fake_data_time.dart';
+import '../../../testing/models/fake_discard_order.dart';
 
 void main() {
   late FakeApiClient fakeApiClient;
@@ -204,12 +208,142 @@ void main() {
         );
       });
 
-      test(
-        'Should ',
-        () async {},
-      );
+      test('Should remove the oldest discarded orders when limit is exceeded', () async {
+        // Arrange
+        fakeSharedPreferencesService.overrideStringListValue = List<String>.generate(
+          AppConfig.latestReportsLimit,
+          (index) => 'PROD${index + 1}',
+        );
+
+        // Act
+        await orderRepository.addDiscardedOrder('PROD456');
+        await orderRepository.addDiscardedOrder('PROD457');
+
+        // Assert
+        final result = await fakeSharedPreferencesService.getStringList(SharedPreferencesKeys.discardedOrders.name);
+        result.match(
+          (failure) => fail('Expected right but got left: $failure'),
+          (value) {
+            expect(value, isA<List<String>>());
+            expect(value?.length, AppConfig.latestReportsLimit);
+            expect(value, contains('PROD456'));
+            expect(value, contains('PROD457'));
+            expect(value, isNot(contains('PROD24')));
+            expect(value, isNot(contains('PROD25')));
+          },
+        );
+      });
+
+      test('Should return StorageErrorCodes.sharedPrefsWriteError if save fails', () async {
+        // Arrange
+        fakeSharedPreferencesService.shouldFailWrites = true;
+
+        // Act
+        final result = await orderRepository.addDiscardedOrder('PROD456');
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.match(
+          (failure) {
+            expect(failure.code, StorageErrorCodes.sharedPrefsWriteError);
+          },
+          (_) => fail('Expected left but got right'),
+        );
+      });
+
+      test('Should return StorageErrorCodes.sharedPrefsReadError if read fails', () async {
+        // Arrange
+        fakeSharedPreferencesService.shouldFailReads = true;
+
+        // Act
+        final result = await orderRepository.addDiscardedOrder('PROD456');
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.match(
+          (failure) {
+            expect(failure.code, StorageErrorCodes.sharedPrefsReadError);
+          },
+          (_) => fail('Expected left but got right'),
+        );
+      });
+
+      test('Should not add anything to stream if save fails', () async {
+        // Arrange
+        fakeSharedPreferencesService
+          ..overrideStringListValue = ['PROD123']
+          ..shouldFailWrites = true;
+
+        final emitted = <List<String>>[];
+        final sub = orderRepository.discardedOrdersController.stream.listen(emitted.add);
+
+        // Act
+        final result = await orderRepository.addDiscardedOrder('PROD456');
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+
+        // Assert
+        expect(result.isLeft(), true);
+        result.match(
+          (failure) => expect(failure.code, StorageErrorCodes.sharedPrefsWriteError),
+          (_) => fail('Expected left but got right'),
+        );
+
+        expect(emitted.length, 1);
+        expect(emitted.single, ['PROD123']);
+        expect(emitted.single, isNot(contains('PROD456')));
+
+        await sub.cancel();
+      });
     });
-    group('getDiscardedOrders', () {});
-    group('getDiscardedOrderDetails', () {});
+    group('getDiscardedOrders', () {
+      test('Should return discarded orders data', () async {
+        // Arrange
+        const query = 'test_query';
+
+        // Act
+        final result = await orderRepository.getDiscardedOrders(query: query);
+
+        // Assert
+        expect(fakeApiClient.requestCount, 1);
+        expect(result.isRight(), true);
+        result.match(
+          (failure) => fail('Expected right but got left: $failure'),
+          (data) {
+            expect(data.items, isA<List<DiscardedOrderPreview>>());
+            expect(data.items.length, 2);
+            expect(data.nextCursor, isNull);
+          },
+        );
+      });
+    });
+    group('getDiscardedOrderDetails', () {
+      test('Should return discarded order details', () async {
+        // Arrange
+        const orderId = 1;
+
+        // Act
+        final result = await orderRepository.getDiscardedOrderDetails(orderId);
+
+        // Assert
+        expect(fakeApiClient.requestCount, 1);
+        expect(result.isRight(), true);
+        result.match(
+          (failure) => fail('Expected right but got left: $failure'),
+          (details) {
+            expect(details.id, 1);
+            expect(details.prodId, 'PROD123');
+            expect(details.salesId, 'SAL456');
+            expect(details.discardedAtUtc, kDateTime);
+            expect(details.employeeId, 'EMP789');
+            expect(details.errorCode, 'E001');
+            expect(details.note, 'Sample discarded order');
+            expect(details.productType, 'TypeA');
+            expect(details.worktop, 'Worktop1');
+            expect(details.errorDescription, 'Defective item');
+            expect(details.machineName, 'MachineX');
+          },
+        );
+      });
+    });
   });
 }

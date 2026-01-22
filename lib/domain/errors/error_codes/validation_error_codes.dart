@@ -6,6 +6,7 @@ enum ValidationErrorCodes implements AppErrorCode {
   parsingError('VALIDATION_PARSING_ERROR'),
   unknown('VALIDATION_UNKNOWN'),
   apiError('VALIDATION_API_ERROR'),
+  invalidEmployeeId('VALIDATION_INVALID_EMPLOYEE_ID'),
   missingDiscardReason('VALIDATION_MISSING_DISCARD_REASON')
   ;
 
@@ -28,6 +29,7 @@ enum ValidationErrorCodes implements AppErrorCode {
     ValidationErrorCodes.invalidJsonFormat => l10n.error_validation_invalid_json_format,
     ValidationErrorCodes.parsingError => l10n.error_validation_parsing_error,
     ValidationErrorCodes.apiError => l10n.error_validation_api_error,
+    ValidationErrorCodes.invalidEmployeeId => l10n.error_validation_invalid_employee_id,
     ValidationErrorCodes.missingDiscardReason => l10n.error_validation_missing_discard_reason,
   };
 }

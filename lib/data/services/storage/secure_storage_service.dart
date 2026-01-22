@@ -71,4 +71,66 @@ class SecureStorageService implements KeyValueStorage {
       );
     }
   }
+
+  @override
+  Future<Either<AppFailure, List<String>?>> getStringList(String key) async {
+    try {
+      final storedValue = await _secureStorage.read(key: key);
+      if (storedValue == null) {
+        return right(null);
+      }
+      final List<String> valueList = storedValue.split('|');
+      return right(valueList);
+    } catch (e, st) {
+      _logger.severe('Error reading string list from secure storage', e, st);
+      return left(
+        AppFailure(code: StorageErrorCodes.secureStorageReadError, context: {'exception': e.toString(), 'key': key}),
+      );
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, void>> setStringList(String key, List<String> value) async {
+    try {
+      final storedValue = value.join('|');
+      await _secureStorage.write(key: key, value: storedValue);
+      return right(null);
+    } catch (e, st) {
+      _logger.severe('Error writing string list to secure storage', e, st);
+      return left(
+        AppFailure(code: StorageErrorCodes.secureStorageWriteError, context: {'exception': e.toString(), 'key': key}),
+      );
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, bool?>> getBool(String key) async {
+    try {
+      final storedValue = await _secureStorage.read(key: key);
+      if (storedValue == null) {
+        return right(null);
+      }
+      final boolValue = storedValue == '1' ? true : false;
+      return right(boolValue);
+    } catch (e, st) {
+      _logger.severe('Error reading bool from secure storage', e, st);
+      return left(
+        AppFailure(code: StorageErrorCodes.secureStorageReadError, context: {'exception': e.toString(), 'key': key}),
+      );
+    }
+  }
+
+  @override
+  Future<Either<AppFailure, void>> setBool(String key, bool value) async {
+    try {
+      final storedValue = value ? '1' : '0';
+      await _secureStorage.write(key: key, value: storedValue);
+      return right(null);
+    } catch (e, st) {
+      _logger.severe('Error writing bool to secure storage', e, st);
+      return left(
+        AppFailure(code: StorageErrorCodes.secureStorageWriteError, context: {'exception': e.toString(), 'key': key}),
+      );
+    }
+  }
 }

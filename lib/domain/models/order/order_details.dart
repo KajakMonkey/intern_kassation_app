@@ -8,12 +8,14 @@ class OrderDetails with OrderDetailsMappable {
   final String salesId;
   final String worktop;
   final ProductType productType;
+  final String productGroup;
   final String productionOrder;
 
   OrderDetails({
     required this.salesId,
     required this.worktop,
     required this.productType,
+    required this.productGroup,
     required this.productionOrder,
   });
 }

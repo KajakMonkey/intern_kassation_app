@@ -47,7 +47,9 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
               orElse: () {},
             );
           case AuthResponseStatus.unauthenticated:
-            emit.safe(state.copyWith(authStatus: const AuthStatus.unauthenticated()));
+            emit.safe(
+              state.copyWith(authStatus: const AuthStatus.unauthenticated(), userStatus: const UserStatus.initial()),
+            );
           case AuthResponseStatus.failure:
             emit.safe(state.copyWith(authStatus: AuthStatus.failure(response.failure!, response.hasRefreshToken)));
             state.userStatus.maybeWhen(

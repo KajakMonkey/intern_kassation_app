@@ -331,6 +331,24 @@ abstract class AppLocalizations {
   /// **'Trin {currentStep} af {totalSteps}'**
   String step_of(int currentStep, int totalSteps);
 
+  /// No description provided for @unknown_step_error.
+  ///
+  /// In da, this message translates to:
+  /// **'Ukendt produktgruppe'**
+  String get unknown_step_error;
+
+  /// No description provided for @unknown_step_description.
+  ///
+  /// In da, this message translates to:
+  /// **'Appen understøtter ikke denne produktgruppe, hvis du mener, at dette er en fejl, kontakt venligst IT-afdelingen.'**
+  String get unknown_step_description;
+
+  /// No description provided for @go_to_main_menu.
+  ///
+  /// In da, this message translates to:
+  /// **'Gå til hovedmenu'**
+  String get go_to_main_menu;
+
   /// No description provided for @invalid_employee_id.
   ///
   /// In da, this message translates to:
@@ -829,6 +847,12 @@ abstract class AppLocalizations {
   /// **'Der opstod en fejl under kommunikation med serveren.'**
   String get error_validation_api_error;
 
+  /// No description provided for @error_validation_invalid_employee_id.
+  ///
+  /// In da, this message translates to:
+  /// **'Ugyldig medarbejder. Gå tilbage og indtast et gyldigt medarbejder ID.'**
+  String get error_validation_invalid_employee_id;
+
   /// No description provided for @error_validation_missing_discard_reason.
   ///
   /// In da, this message translates to:
@@ -960,6 +984,24 @@ abstract class AppLocalizations {
   /// In da, this message translates to:
   /// **'Vis fejldetaljer'**
   String get view_error_details;
+
+  /// No description provided for @page_not_found_title.
+  ///
+  /// In da, this message translates to:
+  /// **'Side ikke fundet'**
+  String get page_not_found_title;
+
+  /// No description provided for @page_not_found_description.
+  ///
+  /// In da, this message translates to:
+  /// **'Den side, du leder efter, findes ikke.'**
+  String get page_not_found_description;
+
+  /// No description provided for @page_not_found_requested_uri.
+  ///
+  /// In da, this message translates to:
+  /// **'Anmodet URI: {requestedUri}'**
+  String page_not_found_requested_uri(String requestedUri);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

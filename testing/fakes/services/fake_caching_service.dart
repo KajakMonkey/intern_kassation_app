@@ -7,6 +7,11 @@ class FakeCachingService implements CachingService {
   final Map<String, String> _cache = {};
   final Map<String, DateTime> _expiry = {};
 
+  void addToCache(String key, String value, {Duration ttl = const Duration(hours: 1)}) {
+    _cache[key] = value;
+    _expiry[key] = clock.now().toUtc().add(ttl);
+  }
+
   @override
   Future<Either<AppFailure, void>> write(
     String key,
