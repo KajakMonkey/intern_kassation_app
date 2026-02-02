@@ -48,7 +48,6 @@ class DiscardReasonTabletLayout extends StatelessWidget {
       }
     }
 
-    // Don't forget the last category's reasons
     if (categoryReasons.isNotEmpty) {
       widgets.add(_buildReasonGrid(context, categoryReasons));
     }

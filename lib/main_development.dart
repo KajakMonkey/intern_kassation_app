@@ -15,6 +15,7 @@ void main() async {
   Logger('MainDevelopment').info('Starting app in DEVELOPMENT mode with API URL: ${EnvManager.apiUrl}');
 
   if (!kReleaseMode) {
+    debugInvertOversizedImages = true;
     Bloc.observer = AppBlocObserver();
   }
 

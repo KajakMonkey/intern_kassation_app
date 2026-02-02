@@ -115,7 +115,7 @@ class _DiscardFormScreenState extends State<DiscardFormScreen> {
     );
 
     if (confirmed && mounted) {
-      context.maybePop();
+      context.maybePopElse(Routes.scan.name);
     }
   }
 

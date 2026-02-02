@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:intern_kassation_app/common_index.dart';
-import 'package:intern_kassation_app/config/constants/product_type.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/error_codes_index.dart';
 import 'package:intern_kassation_app/routing/navigator.dart';
 import 'package:intern_kassation_app/routing/router.dart';
+import 'package:intern_kassation_app/ui/core/barcode_stream.dart';
 import 'package:intern_kassation_app/ui/core/ui/dialog/app_dialog.dart';
 import 'package:intern_kassation_app/ui/core/ui/dialog/error_sheet.dart';
 import 'package:intern_kassation_app/ui/scan/cubit/scan_cubit.dart';
@@ -25,6 +26,10 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
   late final FocusNode _keyboardFocusNode;
   String? _errorText;
 
+  late final VoidCallback _focusListener;
+
+  StreamSubscription<String>? _barcodeSub;
+
   final _scanBuffer = StringBuffer();
   Timer? _scanDebounce;
   DateTime? _lastKeyTs;
@@ -37,6 +42,35 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
     super.initState();
     _ordrenrController = TextEditingController();
     _keyboardFocusNode = FocusNode();
+
+    // Listen to native barcode stream:
+    // If on Windows, use SerialPort instead: https://pub.dev/packages/serial_port_win32
+    if (Platform.isAndroid) {
+      _barcodeSub = BarcodeStream.stream.listen((event) {
+        log('ScanScreen: Received barcode event: $event');
+        if (!mounted) return;
+        final code = event.toString().trim();
+        if (code.isEmpty) return;
+
+        setState(() {
+          _ordrenrController.text = code;
+          _errorText = null;
+        });
+        unawaited(_submitForm());
+      });
+    }
+
+    _focusListener = () {
+      final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+      if (!isCurrent) return;
+
+      if (!_keyboardFocusNode.hasFocus) {
+        log('ScanScreen: Keyboard focus lost, requesting focus again');
+        _keyboardFocusNode.requestFocus();
+      }
+    };
+
+    _keyboardFocusNode.addListener(_focusListener);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _keyboardFocusNode.requestFocus();
@@ -52,7 +86,9 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
   @override
   void dispose() {
     scanRouteObserver.unsubscribe(this);
+    _keyboardFocusNode.removeListener(_focusListener);
     _scanDebounce?.cancel();
+    _barcodeSub?.cancel();
     _ordrenrController.dispose();
     _keyboardFocusNode.dispose();
     super.dispose();
@@ -60,7 +96,7 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
 
   @override
   void didPopNext() {
-    // Called when returning to this screen (covering route was popped)
+    log('ScanScreen: didPopNext called');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _keyboardFocusNode.requestFocus();
@@ -70,7 +106,7 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
 
   @override
   void didPush() {
-    // Called when this route is pushed
+    log('ScanScreen: didPush called');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _keyboardFocusNode.requestFocus();
@@ -80,7 +116,7 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
 
   @override
   void didPushNext() {
-    // Called when a new route is pushed on top of this one
+    log('ScanScreen: didPushNext called');
     _keyboardFocusNode.unfocus();
   }
 
@@ -181,7 +217,7 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
         state.orderStatus.maybeWhen(
           success: (details) {
             _ordrenrController.clear();
-            context.navigator.goDiscardPage(
+            context.navigator.pushDiscardPage(
               salesId: details.salesId,
               worktop: details.worktop,
               productType: details.productType,
@@ -296,18 +332,6 @@ class _ScanScreenState extends State<ScanScreen> with RouteAware {
                     ),
                   ),
                   Gap.vl,
-                  ElevatedButton(
-                    onPressed: () {
-                      context.navigator.pushDiscardPage(
-                        salesId: 'tst123',
-                        worktop: 'A',
-                        productType: ProductType.unknown,
-                        productGroup: 'GA',
-                        produktionsOrder: 'test123',
-                      );
-                    },
-                    child: Text('to test page'),
-                  ),
                   const LatestDiscardedList(),
                 ],
               ),

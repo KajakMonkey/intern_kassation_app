@@ -59,7 +59,6 @@ class DiscardReasonsRepository {
       final items = cachedItems.fold(
         (_) => null,
         (data) {
-          _logger.info('Loaded dropdown items from cache for category: $category');
           return data != null ? List<String>.from(data.split(',')) : null;
         },
       );
