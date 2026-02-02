@@ -41,7 +41,7 @@ class AuthRepository {
   final _logger = Logger('AuthRepository');
 
   late final Stream<AuthRepoResponse> _statusStream = (() async* {
-    _logger.info('Starting authentication status stream');
+    _logger.fine('Starting authentication status stream');
     const loading = AuthRepoResponse(status: AuthResponseStatus.loading);
     _currentResponse = loading;
     yield loading;
@@ -62,7 +62,6 @@ class AuthRepository {
   Stream<AuthRepoResponse> get stream => _statusStream;
 
   Future<AuthRepoResponse?> _trySilentAuthentication() async {
-    _logger.info('Attempting silent authentication');
     final token = await _loadToken();
     if (token == null) {
       return null;
@@ -77,7 +76,6 @@ class AuthRepository {
     }
 
     if (token.hasValidRefreshToken) {
-      _logger.info('_trySilentAuthentication: Access token expired, attempting to refresh using refresh token');
       final result = await refresh();
       return result.fold(
         (failure) => AuthRepoResponse(status: AuthResponseStatus.failure, failure: failure, hasRefreshToken: true),
@@ -93,7 +91,7 @@ class AuthRepository {
     required String password,
     bool refreshIfAvailable = false,
   }) async {
-    _logger.info('Attempting to log in user: $username');
+    _logger.fine('Attempting to log in user: $username');
     if (refreshIfAvailable) {
       final silentAuthResult = await _trySilentAuthentication();
       if (silentAuthResult != null) {
@@ -155,10 +153,10 @@ class AuthRepository {
   }
 
   Future<Either<AppFailure, AuthRepoResponse>> refresh({bool forceRefresh = false}) async {
-    _logger.info('Attempting to refresh access token');
+    _logger.fine('Attempting to refresh access token');
     final currentToken = _cachedToken ?? await _loadToken();
     if (currentToken != null && currentToken.hasValidAccessToken && !forceRefresh) {
-      _logger.info('Current access token is still valid, no need to refresh');
+      _logger.fine('Current access token is still valid, no need to refresh');
       final repoResponse = AuthRepoResponse(
         status: AuthResponseStatus.authenticated,
         hasRefreshToken: currentToken.hasValidRefreshToken,
@@ -195,7 +193,6 @@ class AuthRepository {
         return left(failure);
       },
       (token) async {
-        _logger.info('Successfully refreshed access token');
         if (!token.hasValidAccessToken || !token.hasValidRefreshToken) {
           final failure = AppFailure(
             code: AuthErrorCode.invalidToken,
@@ -223,7 +220,6 @@ class AuthRepository {
             return left(failure);
           },
           (_) {
-            _logger.info('Successfully saved refreshed token');
             final repoResponse = AuthRepoResponse(
               status: AuthResponseStatus.authenticated,
               hasRefreshToken: token.hasValidRefreshToken,
@@ -322,9 +318,6 @@ class AuthRepository {
   }
 
   Future<Either<AppFailure, void>> saveToken(Token token) async {
-    _logger.info(
-      'Saving token with refresh token: ${token.refreshToken}',
-    );
     final result = await _secureStorageService.write(
       SecureStorageKeys.token.name,
       token.toJson(),

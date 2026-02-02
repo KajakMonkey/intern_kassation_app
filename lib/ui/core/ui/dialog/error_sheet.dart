@@ -230,8 +230,7 @@ dynamic _normalizeForJson(Object? value) {
     return value.toIso8601String();
   }
   if (value is Enum) {
-    return value.name; // Dart 2.17+ enums
+    return value.name;
   }
-  // Add other conversions if needed (e.g., Uri -> string)
   return value;
 }

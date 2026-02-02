@@ -58,4 +58,7 @@ final class AppFailure with AppFailureMappable implements AppError {
   String toString() {
     return 'AppFailure(code: $code, problemDetails: $problemDetails, context: $context)';
   }
+
+  static const fromMap = AppFailureMapper.fromMap;
+  static const fromJson = AppFailureMapper.fromJson;
 }

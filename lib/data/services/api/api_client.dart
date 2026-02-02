@@ -21,6 +21,7 @@ import 'package:intern_kassation_app/domain/models/user.dart';
 import 'package:intern_kassation_app/utils/extensions/dio_type_extension.dart';
 import 'package:intern_kassation_app/utils/extensions/int_extension.dart';
 import 'package:logging/logging.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 typedef AuthHeaderProvider = Future<String?> Function();
 
@@ -43,7 +44,7 @@ class ApiClient {
     );
 
     dio.interceptors.add(RetryInterceptor(dio: dio, logPrint: _logger.info));
-    dio.interceptors.add(
+    /* dio.interceptors.add(
       LogInterceptor(
         requestHeader: true,
         requestBody: kDebugMode,
@@ -51,17 +52,31 @@ class ApiClient {
         request: true,
         logPrint: (obj) => _logger.fine(_redactAuth(obj)),
       ),
+    ); */
+
+    dio.interceptors.add(
+      PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: 90,
+        enabled: kDebugMode,
+        logPrint: (obj) => _logger.fine(obj),
+      ),
     );
 
     return dio;
   }
 
-  static String _redactAuth(Object? obj) {
+  /* static String _redactAuth(Object? obj) {
     final s = obj?.toString() ?? '';
     return s
         .replaceAll(
-          RegExp(r'^\s*(authorization:\s*)Bearer\s+\S+', caseSensitive: false, multiLine: true),
-          r' authorization: Bearer [REDACTED]',
+          RegExp(r'(Bearer)\s+[A-Za-z0-9\-\._=]+', caseSensitive: false),
+          r'\1 [REDACTED]',
         )
         .replaceAll(
           RegExp(r'("password"\s*:\s*")([^"]+)(")', caseSensitive: false),
@@ -75,7 +90,14 @@ class ApiClient {
           RegExp(r'("refreshToken"\s*:\s*")([^"]+)(")', caseSensitive: false),
           r'\1[REDACTED]\3',
         );
-  }
+  } */
+
+  /*
+  .replaceAll(
+          RegExp(r'^\s*(authorization:\s*)Bearer\s+\S+', caseSensitive: false, multiLine: true),
+          r' authorization: Bearer [REDACTED]',
+        )
+  */
 
   final Dio _client;
 

@@ -31,7 +31,7 @@ class DiscardedOrdersList extends StatelessWidget {
               return ListTile(
                 title: Text('${discard.prodId} - ${discard.discardedAtUtc.formatFromUtc()}'),
                 subtitle: Text(
-                  '${context.l10n.product_group}: ${discard.productType}\n${context.l10n.error_code}: ${discard.errorCode}',
+                  '${context.l10n.product_group}: ${discard.productType}\n${context.l10n.error_code}: ${discard.errorCode}\n${context.l10n.description}: ${discard.errorDescription ?? '???'}',
                 ),
                 isThreeLine: true,
                 onTap: () {

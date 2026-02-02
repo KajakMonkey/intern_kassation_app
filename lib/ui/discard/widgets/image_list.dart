@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:intern_kassation_app/common_index.dart';
+import 'package:intern_kassation_app/ui/core/extensions/image_cache_size_extension.dart';
 import 'package:intern_kassation_app/ui/core/ui/responsive.dart';
 import 'package:intern_kassation_app/ui/discard/cubit/discard_cubit.dart';
 import 'package:intern_kassation_app/ui/discard/widgets/image_dialog.dart';
@@ -21,6 +22,14 @@ class ImageList extends StatelessWidget {
     );
   }
 
+  int getImageCacheSize(BuildContext context) {
+    if (Responsive.isTablet(context)) {
+      return 195.cacheSize(context);
+    } else {
+      return 240.cacheSize(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DiscardCubit, DiscardState>(
@@ -31,7 +40,7 @@ class ImageList extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: Responsive.isTablet(context) ? 6 : 3,
+            crossAxisCount: Responsive.isTablet(context) ? 6 : 4,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
           ),
@@ -47,8 +56,10 @@ class ImageList extends StatelessWidget {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(8),
                       image: DecorationImage(
-                        image: FileImage(
-                          File(imagePath),
+                        image: ResizeImage(
+                          FileImage(File(imagePath)),
+                          width: getImageCacheSize(context),
+                          height: getImageCacheSize(context),
                         ),
                         fit: BoxFit.cover,
                       ),

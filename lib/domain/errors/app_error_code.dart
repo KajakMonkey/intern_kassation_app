@@ -6,49 +6,6 @@ abstract interface class AppErrorCode {
   String getMessage(AppLocalizations l10n);
 }
 
-/* class AppErrorCodeTranslator {
-  static AppErrorCode toAppErrorCode(String code) {
-    final authErrorCode = AuthErrorCode.fromString(code);
-    if (authErrorCode != AuthErrorCode.unknown) {
-      return authErrorCode;
-    }
-    final networkErrorCode = NetworkErrorCodes.fromString(code);
-    if (networkErrorCode != NetworkErrorCodes.unknown) {
-      return networkErrorCode;
-    }
-    final productErrorCode = ProductErrorCodes.fromString(code);
-    if (productErrorCode != ProductErrorCodes.unknown) {
-      return productErrorCode;
-    }
-    final stroageErrorCode = StorageErrorCodes.fromString(code);
-    if (stroageErrorCode != StorageErrorCodes.unknown) {
-      return stroageErrorCode;
-    }
-    final validationErrorCode = ValidationErrorCodes.fromString(code);
-    if (validationErrorCode != ValidationErrorCodes.unknown) {
-      return validationErrorCode;
-    }
-    final employeeErrorCode = EmployeeErrorCodes.fromString(code);
-    if (employeeErrorCode != EmployeeErrorCodes.unknown) {
-      return employeeErrorCode;
-    }
-    final orderErrorCode = OrderErrorCodes.fromString(code);
-    if (orderErrorCode != OrderErrorCodes.unknown) {
-      return orderErrorCode;
-    }
-    final storageErrorCode = StorageErrorCodes.fromString(code);
-    if (storageErrorCode != StorageErrorCodes.unknown) {
-      return storageErrorCode;
-    }
-    final valadationErrorCode = ValidationErrorCodes.fromString(code);
-    if (valadationErrorCode != ValidationErrorCodes.unknown) {
-      return valadationErrorCode;
-    }
-
-    return GeneralErrorCodes.fromString(code);
-  }
-} */
-
 typedef Parser = AppErrorCode Function(String code);
 
 class AppErrorCodeTranslator {
@@ -60,6 +17,7 @@ class AppErrorCodeTranslator {
     RegExp(r'^(VAL|VALIDATION)_'): (c) => ValidationErrorCodes.fromString(c),
     RegExp(r'^(EMP|EMPLOYEE)_'): (c) => EmployeeErrorCodes.fromString(c),
     RegExp(r'^(ORD|ORDER)_'): (c) => OrderErrorCodes.fromString(c),
+    RegExp(r'^(IMA|IMAGE)_'): (c) => ImageErrorCodes.fromString(c),
   };
 
   static AppErrorCode toAppErrorCode(String code) {

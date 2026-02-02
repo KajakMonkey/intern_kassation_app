@@ -15,7 +15,7 @@ import 'package:intern_kassation_app/ui/discard/widgets/screens/discard_form_scr
 import 'package:intern_kassation_app/ui/lookup/cubits/lookup_cubit/lookup_cubit.dart';
 import 'package:intern_kassation_app/ui/lookup/cubits/lookup_details_cubit/lookup_details_cubit.dart';
 import 'package:intern_kassation_app/ui/lookup/widgets/screens/lookup_details_screen.dart';
-import 'package:intern_kassation_app/ui/lookup/widgets/lookup_screen.dart';
+import 'package:intern_kassation_app/ui/lookup/widgets/screens/lookup_screen.dart';
 import 'package:intern_kassation_app/ui/scan/widgets/screens/camra_scan_screen.dart';
 import 'package:intern_kassation_app/ui/scan/widgets/screens/manual_scan_screen.dart';
 import 'package:intern_kassation_app/ui/scan/widgets/screens/scan_screen.dart';

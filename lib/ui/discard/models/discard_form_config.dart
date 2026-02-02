@@ -14,6 +14,13 @@ class DiscardFormConfig {
         DiscardFormStep.note,
         DiscardFormStep.overview,
       ],
+      _ when productType.isLaminateProduct => [
+        DiscardFormStep.employeeId,
+        DiscardFormStep.discardReason,
+        DiscardFormStep.images,
+        DiscardFormStep.note,
+        DiscardFormStep.overview,
+      ],
 
       // Unknown or fallback
       _ => [DiscardFormStep.unknown],

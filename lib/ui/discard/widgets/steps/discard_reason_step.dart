@@ -63,12 +63,16 @@ class _DiscardReasonStepState extends State<DiscardReasonStep> {
         ..addAll(groupedReasons[category]!.map(ReasonItem.new));
     }
 
-    // Add uncategorized reasons at the end
     final uncategorized = groupedReasons[null];
     if (uncategorized != null) {
-      items
-        ..add(CategoryItem(l10n.other))
-        ..addAll(uncategorized.map(ReasonItem.new));
+      final sorted = [...uncategorized]..sort((a, b) => _getMinErrorCode([a]).compareTo(_getMinErrorCode([b])));
+      if (categories.isEmpty) {
+        items.addAll(sorted.map(ReasonItem.new));
+      } else {
+        items
+          ..add(CategoryItem(l10n.other))
+          ..addAll(sorted.map(ReasonItem.new));
+      }
     }
 
     return items;

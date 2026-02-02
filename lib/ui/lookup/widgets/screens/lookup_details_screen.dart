@@ -66,7 +66,7 @@ class DetailsWidget extends StatelessWidget {
             _buildInfoRow(l10n.code, details.errorCode),
             _buildInfoRow(
               l10n.description,
-              details.errorDescription ?? '-',
+              details.errorDescription ?? '???',
             ),
             if (details.machineName != null && details.machineName!.isNotEmpty)
               _buildInfoRow(l10n.machine, details.machineName!),
@@ -77,7 +77,7 @@ class DetailsWidget extends StatelessWidget {
           context,
           title: l10n.free_text_elaboration,
           children: [
-            Text(details.note.isNotEmpty ? details.note : '-'),
+            Text(details.note.isNotEmpty ? details.note : ''),
           ],
         ),
       ],

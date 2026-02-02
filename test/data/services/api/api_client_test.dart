@@ -171,7 +171,7 @@ void main() {
           "notes": "note",
           "employeeId": "E1",
           "machineName": "M1",
-          "errorDescription": "desc"
+          "errorText": "desc"
         }
         ''',
         ),

@@ -16,6 +16,7 @@ class DiscardedOrderDetails with DiscardedOrderDetailsMappable {
   final String note;
   final String employeeId;
   final String? machineName;
+  @MappableField(key: 'errorText')
   final String? errorDescription;
 
   DiscardedOrderDetails({

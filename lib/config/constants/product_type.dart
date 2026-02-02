@@ -1,4 +1,4 @@
-// TODO: Add All product types used in the system
+// when adding new product types, make sure to update DiscardFormConfig accordingly
 enum ProductType {
   unknown(code: 'UNKNOWN'),
   // Stenprodukter
@@ -11,7 +11,10 @@ enum ProductType {
   terrazzo(code: 'TE'),
   ceramics(code: 'ZA'),
   kvikKermik(code: 'ZC'),
-  granit(code: 'NA')
+  granit(code: 'NA'),
+  // TODO: what other codes are needed for laminate?
+  // Laminatprodukter
+  laminat(code: 'LA')
   ;
 
   const ProductType({required this.code});
@@ -30,6 +33,8 @@ enum ProductType {
     'TE' => ProductType.terrazzo,
     'ZA' => ProductType.ceramics,
     'ZC' => ProductType.kvikKermik,
+    // Laminatprodukter
+    'LA' => ProductType.laminat,
     _ => ProductType.unknown,
   };
 
@@ -44,6 +49,11 @@ enum ProductType {
     ProductType.terrazzo ||
     ProductType.ceramics ||
     ProductType.kvikKermik => true,
+    _ => false,
+  };
+
+  bool get isLaminateProduct => switch (this) {
+    ProductType.laminat => true,
     _ => false,
   };
 }

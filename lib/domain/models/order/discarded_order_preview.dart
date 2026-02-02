@@ -6,6 +6,8 @@ part 'discarded_order_preview.mapper.dart';
 class DiscardedOrderPreview with DiscardedOrderPreviewMappable {
   final int id;
   final String errorCode;
+  @MappableField(key: 'errorText')
+  final String? errorDescription;
   final String productType;
   @MappableField(key: 'discardDateUtc')
   final DateTime discardedAtUtc;
@@ -15,6 +17,7 @@ class DiscardedOrderPreview with DiscardedOrderPreviewMappable {
   DiscardedOrderPreview({
     required this.id,
     required this.errorCode,
+    this.errorDescription,
     required this.productType,
     required this.discardedAtUtc,
     required this.prodId,
