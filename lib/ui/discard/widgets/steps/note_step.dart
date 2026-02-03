@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:intern_kassation_app/common_index.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
-import 'package:intern_kassation_app/config/env.dart';
+import 'package:intern_kassation_app/config/env/env.dart';
 import 'package:intern_kassation_app/ui/core/extensions/buildcontext_extension.dart';
 import 'package:intern_kassation_app/ui/discard/cubit/discard_cubit.dart';
 import 'package:intern_kassation_app/ui/discard/models/step_navigation_config.dart';

@@ -14,4 +14,6 @@ class AppConfig {
   static const imageUploadTimeout = Duration(minutes: 2);
 
   static const tokenRefreshGracePeriod = Duration(minutes: 5);
+
+  static const defaultCachingTtl = Duration(minutes: 15);
 }

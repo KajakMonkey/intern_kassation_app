@@ -1,5 +1,6 @@
 import 'package:intern_kassation_app/common_index.dart';
 import 'package:intern_kassation_app/domain/models/order/discarded_order_details.dart';
+import 'package:intern_kassation_app/ui/core/ui/shimmer_effect.dart';
 import 'package:intern_kassation_app/ui/lookup/cubits/lookup_details_cubit/lookup_details_cubit.dart';
 import 'package:intern_kassation_app/utils/extensions/date_extension.dart';
 
@@ -23,7 +24,7 @@ class LookupDetailsScreen extends StatelessWidget {
             failure: (failure) {
               return Center(child: Text(failure.getMessage(context.l10n)));
             },
-            orElse: () => const Center(child: CircularProgressIndicator()),
+            orElse: () => const DetailsShimmer(),
           );
         },
       ),
@@ -128,6 +129,89 @@ class DetailsWidget extends StatelessWidget {
             child: SelectableText(value.isNotEmpty ? value : '-'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DetailsShimmer extends StatelessWidget {
+  const DetailsShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        _ShimmerCard(lines: 4),
+        _ShimmerCard(lines: 1),
+        _ShimmerCard(lines: 2),
+        _ShimmerCard(lines: 2),
+      ],
+    );
+  }
+}
+
+class _ShimmerCard extends StatelessWidget {
+  const _ShimmerCard({required this.lines});
+
+  final int lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const ShimmerEffect(
+              child: SizedBox(
+                width: 160,
+                height: 14,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: Color(0xFFE0E0E0)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 4),
+            ...List.generate(lines, (_) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: ShimmerEffect(
+                        child: SizedBox(
+                          height: 12,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(color: Color(0xFFE0E0E0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      flex: 3,
+                      child: ShimmerEffect(
+                        child: SizedBox(
+                          height: 12,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Color(0xFFE0E0E0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-import 'package:intern_kassation_app/config/env.dart';
+import 'package:intern_kassation_app/config/env/env.dart';
 
 class ApiEndpoints {
   static final String baseAPIUrl = EnvManager.apiUrl;

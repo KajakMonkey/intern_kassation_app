@@ -1,6 +1,6 @@
 import 'package:intern_kassation_app/common_index.dart';
 import 'package:intern_kassation_app/config/dependencies.dart';
-import 'package:intern_kassation_app/config/env.dart';
+import 'package:intern_kassation_app/config/env/env.dart';
 import 'package:intern_kassation_app/routing/router.dart';
 import 'package:intern_kassation_app/ui/core/themes/theme.dart';
 import 'package:provider/provider.dart';

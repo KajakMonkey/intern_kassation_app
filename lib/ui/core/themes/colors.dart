@@ -1,3 +1,5 @@
 import 'package:flutter/material.dart';
 
-const seedColor = Colors.deepPurple;
+abstract final class AppColors {
+  static const seedColor = Colors.deepPurple;
+}

@@ -151,6 +151,7 @@ void main() {
           expect(r.items.length, 2);
           expect(r.items.first.id, 1);
           expect(r.nextCursor, 'next');
+          expect(r.previousCursor, isNull);
           expect(r.pageSize, 10);
         },
       );
@@ -207,6 +208,12 @@ void main() {
             "description": "Reason 1",
             "displayCategory": "Cat",
             "dropdown": "Drop"
+          },
+          {
+            "errorCode": "E2",
+            "description": "Reason 2",
+            "displayCategory": "Dog",
+            "dropdown": "Drop2"
           }
         ]
         ''',
@@ -218,8 +225,17 @@ void main() {
       result.match(
         (l) => fail('Expected right, got $l'),
         (r) {
-          expect(r.length, 1);
+          expect(r.length, 2);
+
           expect(r.first.errorCode, 'E1');
+          expect(r.first.description, 'Reason 1');
+          expect(r.first.displayCategory, 'Cat');
+          expect(r.first.shownDropdownCategory, 'Drop');
+
+          expect(r[1].errorCode, 'E2');
+          expect(r[1].description, 'Reason 2');
+          expect(r[1].displayCategory, 'Dog');
+          expect(r[1].shownDropdownCategory, 'Drop2');
         },
       );
     });

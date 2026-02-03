@@ -43,9 +43,10 @@ class DiscardedOrdersList extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Gap.s),
+              padding: const EdgeInsets.symmetric(horizontal: Gap.s, vertical: Gap.m),
               child: Row(
                 mainAxisAlignment: .spaceBetween,
+
                 children: [
                   Expanded(
                     child: canGoPrevious

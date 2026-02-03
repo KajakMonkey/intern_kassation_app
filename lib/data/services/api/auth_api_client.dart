@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:intern_kassation_app/config/api_endpoints.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
-import 'package:intern_kassation_app/config/env.dart';
+import 'package:intern_kassation_app/config/env/env.dart';
 import 'package:intern_kassation_app/data/services/api/models/auth/auth_index.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
 import 'package:intern_kassation_app/domain/errors/error_codes/error_codes_index.dart';

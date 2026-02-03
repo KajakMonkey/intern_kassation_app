@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:intern_kassation_app/config/api_endpoints.dart';
 import 'package:intern_kassation_app/config/app_config.dart';
-import 'package:intern_kassation_app/config/env.dart';
+import 'package:intern_kassation_app/config/env/env.dart';
 import 'package:intern_kassation_app/data/services/api/models/orders/discarded_order_query_request.dart';
 import 'package:intern_kassation_app/data/services/api/models/orders/order_details_response.dart';
 import 'package:intern_kassation_app/domain/errors/app_failure.dart';
